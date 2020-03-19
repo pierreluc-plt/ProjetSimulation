@@ -16,6 +16,7 @@ from Functions import Coeff_PML
 # Fonction dépendant de Nx
 
 # Nombre de points en x
+<<<<<<< HEAD
 Nx = 100
 
 
