@@ -1,6 +1,7 @@
 *.xml
 *.iml
 *.npy
+*.png
 
 
 # Byte-compiled / optimized / DLL files
