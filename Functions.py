@@ -41,6 +41,52 @@ def Bois(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois):
     Map[int(centre_bois_x - Nx_Bois / 2), int(centre_bois_y - Ny_Bois / 2) + 1:int(centre_bois_y + Ny_Bois / 2)] = 10
     return Map
 
+# Emplacement du nez du bois:
+def Boisnez(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff):
+    # forme peut-etre soit un triangle ou un cercle
+    # coeff est un angle en radian de la pointe pour le triangle ou le rayon du cercle
+    if forme == 'triangle':
+        hauteur = Nx_Bois/(2*np.tan(coeff/2))
+        larg = Nx_Bois
+        i=0
+        while int(larg) > 1:
+            # On met toute la pointe en bois
+            Map[int(centre_bois_x-larg/2):int(centre_bois_x+larg/2)+1,int(centre_bois_y-Ny_Bois/2)-i]=2
+            # On ajoute le contour
+            Map[int(centre_bois_x-larg/2),int(centre_bois_y-Ny_Bois/2)-i]=20
+            Map[int(centre_bois_x+larg/2),int(centre_bois_y-Ny_Bois/2)-i]=21
+            larg1 = larg +1
+            larg = round(2*(hauteur-i)*np.tan(coeff/2))
+            i+=1
+        # Pour ajouter la derniere pointe
+        if larg1 == 3:
+            Map[int(centre_bois_x-larg/2),int(centre_bois_y-Ny_Bois/2)-i]=22
+        else:
+            Map[int(centre_bois_x-(larg1-2)/2):int(centre_bois_x+(larg1-2)/2),int(centre_bois_y-Ny_Bois/2)-i]=22
+            
+    elif forme == 'cercle':
+        # hauteur est la distance entre le centre du cercle et le cote du rectangle
+        hauteur = np.sqrt(coeff**2-(Nx_Bois/2)**2)
+        centre_y = centre_bois_y - Ny_Bois/2 + hauteur
+        x_val = np.arange(centre_bois_x-Nx_Bois/2,centre_bois_x+Nx_Bois/2+1)
+        for x in x_val:
+            pos_y = round(-np.sqrt(int((coeff)**2 - (x-centre_bois_x)**2)) + centre_y)
+            # Pour faire la frontiere du demi-cercle
+            Map[int(x),int(pos_y)]=23
+            if pos_y < (centre_bois_y-Ny_Bois/2+1):
+                # Pour faire l'interieur du demi-cercle
+                Map[int(x),(int(pos_y+1)):int(centre_bois_y-Ny_Bois/2+1)] = 2
+        # Pour s'assurer qu'il n'y a pas de trou dans la frontiere du demi-cercle
+        x_val1 = np.arange(centre_bois_x-Nx_Bois/2+1,centre_bois_x+Nx_Bois/2)
+        for x in x_val1:
+            pos_y = round(-np.sqrt(int((coeff)**2 - (x-centre_bois_x)**2)) + centre_y)
+            for i in np.arange(1,4):
+                if (Map[int(x),int(pos_y+i)] != 6 and Map[int(x-1),int(pos_y+i)] == 1 and Map[int(x-1),int(pos_y)] == 1 and x < centre_bois_x) or (Map[int(x),int(pos_y+i)] != 6 and Map[int(x+1),int(pos_y+i)] == 1 and Map[int(x+1),int(pos_y)] == 1 and x > centre_bois_x):
+                    Map[int(x),int(pos_y+i)]=23
+    else:
+        print('La variable de forme a ete mal defini.')
+    return Map
+
 
 # Emplacement des PML
 def PML(Map, N_PML):
@@ -161,10 +207,11 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
     return Coeff
 
 
-def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,S_x,S_y,dx,N_PML,plot=True):
+def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,plot=True):
     Map = np.ones([Nx, Ny])
     # Création de la map avec les points
     Map = Bois(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois)
+    Map=Boisnez(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
     Map = PML(Map, N_PML)
     Map = Source(Map, S_x, S_y)
 
@@ -228,7 +275,7 @@ def Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False):
         return Source_Map
 
 
-def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,Map,MapSB,Source_Map):
+def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,Map,MapSB,Source_Map,coeff,centre_bois_x,centre_bois_y):
     h=dx
     # **********************Construction de la matrice A************************
 
@@ -264,13 +311,28 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
     Coeff9 = Coeff_Frontiere(gamma_eau, gamma_bois, -1 / np.sqrt(2), 1 / np.sqrt(2))
     Coeff10 = Coeff_Frontiere(gamma_eau, gamma_bois, -1, 0)
 
-    # Cas 11 à 18 (PML): À compléter !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # Cas 20 à 22 (triangle)
+    # Cas 20
+    Nx20 = -np.cos(coeff/2)
+    Ny20 = -np.sin(coeff/2)
+    Coeff20= Coeff_Frontiere(gamma_eau, gamma_bois, Nx20, Ny20)
+    # Cas 21
+    Nx21 = np.cos(coeff/2)
+    Ny21 = -np.sin(coeff/2)
+    Coeff21= Coeff_Frontiere(gamma_eau, gamma_bois, Nx21, Ny21)
+    # Cas 22
+    Coeff22= Coeff_Frontiere(gamma_eau, gamma_bois, 0, -1)
+    
+    # Cas 23 (Cercle)    
+    # Voir la boucle plus bas
+
+    # Cas 11 à 18 (PML):Dans les fonctions suivantes
 
     # Cas 19 (source): Option 2
     Coeff19 = [0, 1, 0, 1, -(4 - k2_eau * h ** 2), 1, 0, 1, 0]
 
     Dict_Coeff = {1: Coeff1, 2: Coeff2, 3: Coeff3, 4: Coeff4, 5: Coeff5, 6: Coeff6, 7: Coeff7, 8: Coeff8, 9: Coeff9,
-                  10: Coeff10, 19: Coeff19}
+                  10: Coeff10, 19: Coeff19,20:Coeff20,21:Coeff21,22:Coeff22}
 
     A = np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
     b = np.zeros([Nx * Ny], dtype=complex)
@@ -282,6 +344,10 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
             Type = Map[i, j]
             if np.logical_and(Type >= 11, Type <= 18):
                 Coefficient = Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau)
+            elif Type == 23:
+                Nx23 = (i-centre_bois_x)/coeff
+                Ny23 = (j-centre_bois_y)/coeff
+                Coefficient = Coeff_Frontiere(gamma_eau, gamma_bois, Nx23, Ny23)
             else:
                 Coefficient = Dict_Coeff[Type]
 
