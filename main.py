@@ -72,8 +72,10 @@ gamma_eau = rho_eau * (alpha_eau * B_eau + 1j * omega)
 gamma_bois = rho_bois * (alpha_bois * B_bois + 1j * omega)
 
 ## Paramètres modifiables pour l'exécution du code
-
-
+forme = 'triangle'
+coeff = 2*np.pi/4
+#forme = 'cercle'
+#coeff = 11
 
 # Pour faire le code à 9 points ou pas
 Neuf_points = True
@@ -91,10 +93,10 @@ if __name__ == "__main__":
     if SourceCylindrique==True:
         Source_Map=Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False)
 
-    Map,MapSB,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,S_x,S_y,dx,N_PML,plot=True)
+    Map,MapSB,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,plot=True)
 
     A,A_SB, b= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,
-                              Map,MapSB,Source_Map)
+                              Map,MapSB,Source_Map,coeff,centre_bois_x,centre_bois_y)
 
 
 
