@@ -125,11 +125,11 @@ for n in range(1,len(time)-1):
     i=0;j=0;
     P_now[i,j] = 1/(alpha[i,j]*B[i,j]*dt - 1) \
         *( - 5.*B[i,j+1]*dt**2/rho[i,j+1]/dx**2*P[i,j+1,n] \
-            + 4.*B[i,j+2]*dt**2/rho[i,j+2]/dx**2*P[i,j+2,n] \
-            - B[i,j+3]*dt**2/rho[i,j+3]/dx**2*P[i,j+3,n] \
+        + 4.*B[i,j+2]*dt**2/rho[i,j+2]/dx**2*P[i,j+2,n] \
+        - B[i,j+3]*dt**2/rho[i,j+3]/dx**2*P[i,j+3,n] \
         - 5.*B[i+1,j]*dt**2/rho[i+1,j]/dx**2*P[i+1,j,n] \
-            + 4.*B[i+2,j]*dt**2/rho[i+2,j]/dx**2*P[i+2,j,n] \
-            - B[i+3,j]*dt**2/rho[i+3,j]/dx**2*P[i+3,j,n] \
+        + 4.*B[i+2,j]*dt**2/rho[i+2,j]/dx**2*P[i+2,j,n] \
+        - B[i+3,j]*dt**2/rho[i+3,j]/dx**2*P[i+3,j,n] \
         - P[i,j,n]*(-4.*B[i,j]*dt**2/rho[i,j] + 2) \
         + P[i,j,n-1]*(alpha[i,j]*B[i,j]*dt + 1) )
     
@@ -137,11 +137,11 @@ for n in range(1,len(time)-1):
     i=int(Ny)-1;j=0;
     P_now[i,j] = 1/(alpha[i,j]*B[i,j]*dt - 1) \
         *( - 5.*B[i,j+1]*dt**2/rho[i,j+1]/dx**2*P[i,j+1,n] \
-            + 4.*B[i,j+2]*dt**2/rho[i,j+2]/dx**2*P[i,j+2,n] \
-            - B[i,j+3]*dt**2/rho[i,j+3]/dx**2*P[i,j+3,n] \
+        + 4.*B[i,j+2]*dt**2/rho[i,j+2]/dx**2*P[i,j+2,n] \
+        - B[i,j+3]*dt**2/rho[i,j+3]/dx**2*P[i,j+3,n] \
         - 5.*B[i-1,j]*dt**2/rho[i-1,j]/dx**2*P[i-1,j,n] \
-            + 4.*B[i-2,j]*dt**2/rho[i-2,j]/dx**2*P[i-2,j,n] \
-            - B[i-3,j]*dt**2/rho[i-3,j]/dx**2*P[i-3,j,n] \
+        + 4.*B[i-2,j]*dt**2/rho[i-2,j]/dx**2*P[i-2,j,n] \
+        - B[i-3,j]*dt**2/rho[i-3,j]/dx**2*P[i-3,j,n] \
         - P[i,j,n]*(-4.*B[i,j]*dt**2/rho[i,j] + 2) \
         + P[i,j,n-1]*(alpha[i,j]*B[i,j]*dt + 1) )
     
@@ -149,11 +149,11 @@ for n in range(1,len(time)-1):
     i=0;j=int(Nx)-1;
     P_now[i,j] = 1/(alpha[i,j]*B[i,j]*dt - 1) \
         *( - 5.*B[i,j-1]*dt**2/rho[i,j-1]/dx**2*P[i,j-1,n] \
-            + 4.*B[i,j-2]*dt**2/rho[i,j-2]/dx**2*P[i,j-2,n] \
-            - B[i,j-3]*dt**2/rho[i,j-3]/dx**2*P[i,j-3,n] \
+        + 4.*B[i,j-2]*dt**2/rho[i,j-2]/dx**2*P[i,j-2,n] \
+        - B[i,j-3]*dt**2/rho[i,j-3]/dx**2*P[i,j-3,n] \
         - 5.*B[i+1,j]*dt**2/rho[i+1,j]/dx**2*P[i+1,j,n] \
-            + 4.*B[i+2,j]*dt**2/rho[i+2,j]/dx**2*P[i+2,j,n] \
-            - B[i+3,j]*dt**2/rho[i+3,j]/dx**2*P[i+3,j,n] \
+        + 4.*B[i+2,j]*dt**2/rho[i+2,j]/dx**2*P[i+2,j,n] \
+        - B[i+3,j]*dt**2/rho[i+3,j]/dx**2*P[i+3,j,n] \
         - P[i,j,n]*(-4.*B[i,j]*dt**2/rho[i,j] + 2) \
         + P[i,j,n-1]*(alpha[i,j]*B[i,j]*dt + 1) )
     
@@ -161,11 +161,11 @@ for n in range(1,len(time)-1):
     i=int(Ny)-1;j=int(Nx)-1;
     P_now[i,j] = 1/(alpha[i,j]*B[i,j]*dt - 1) \
         *( - 5.*B[i,j-1]*dt**2/rho[i,j-1]/dx**2*P[i,j-1,n] \
-            + 4.*B[i,j-2]*dt**2/rho[i,j-2]/dx**2*P[i,j-2,n] \
-            - B[i,j-3]*dt**2/rho[i,j-3]/dx**2*P[i,j-3,n] \
+        + 4.*B[i,j-2]*dt**2/rho[i,j-2]/dx**2*P[i,j-2,n] \
+        - B[i,j-3]*dt**2/rho[i,j-3]/dx**2*P[i,j-3,n] \
         - 5.*B[i-1,j]*dt**2/rho[i-1,j]/dx**2*P[i-1,j,n] \
-            + 4.*B[i-2,j]*dt**2/rho[i-2,j]/dx**2*P[i-2,j,n] \
-            - B[i-3,j]*dt**2/rho[i-3,j]/dx**2*P[i-3,j,n] \
+        + 4.*B[i-2,j]*dt**2/rho[i-2,j]/dx**2*P[i-2,j,n] \
+        - B[i-3,j]*dt**2/rho[i-3,j]/dx**2*P[i-3,j,n] \
         - P[i,j,n]*(-4.*B[i,j]*dt**2/rho[i,j] + 2) \
         + P[i,j,n-1]*(alpha[i,j]*B[i,j]*dt + 1) )
     
