@@ -368,7 +368,7 @@ def Plots_Results(MapSol,MapSolSB,Display_Map,Interpolation="none"):
     ax[0][1].imshow(np.transpose((np.log(abs(MapSolSB)) + 1e-250)), alpha=1.0, cmap="gist_heat", interpolation=Interpolation)
     ax[0][1].set_title("Distribution  sans bois")
 
-    Diff = abs(np.real(MapSol)) - abs(np.real(MapSolSB))
+    Diff = abs(MapSol) - abs(MapSolSB)
     #Diff = Diff[(S_x - 15):(S_x + 15), (S_y - 15):(S_y + 15)]
     Diff = Diff + 2 * abs(np.min(Diff))
     Diff = np.log(Diff)
