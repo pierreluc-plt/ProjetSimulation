@@ -443,3 +443,19 @@ def Plots_Results(MapSol,MapSolSB,Display_Map,Interpolation="none"):
     ax[1][1].imshow(np.transpose(Display_Map), cmap="binary", alpha=0.1, interpolation="none")
     plt.show()
 
+
+def Surface_equivalent(P_incident,P_scattered,V_incident,V_scattered,Surface):
+    """
+    P_incident: Pression initiale/ incident sur le bateau 
+        (En réalité la puissance sonore donné par Aire * Pression * Vitesse.
+        Puisque la vitesse est la même est on suppose que l'aire sur lequel ils parcourent
+        sont à peu près la même chose, on dit que pression équivaut puissance sonore.)
+    P_scattered: Calculé avec formulation TF/SF
+    V_incident: Volume/Aire incident. Si source ponctuelle, juste prendre dx * dy.
+    V_scattered: Volume/Aire du bateau
+    Surface: Surface/Périmètre étant exposé au P_incident    
+    """
+    
+    SER = Surface*(P_scattered/V_scattered)/(P_incident/V_incident)
+    
+    return SER    
