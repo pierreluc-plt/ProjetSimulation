@@ -10,16 +10,16 @@ Commentaire:
 import numpy as np
 import matplotlib.pyplot as plt
 
-Lx = 10;
-Ly = 10;
+Lx = 10
+Ly = 10
 
-time = np.linspace(0,0.001,300)
+time = np.linspace(0,0.002,300)
 dt = time[1] - time[0]
 
 fact = 0.25
 dx = 0.1*fact
-Nx = np.round(Lx/dx)+1
-Ny = np.round(Ly/dx)+1
+Nx = int(np.round(Lx/dx)+1)
+Ny = int(np.round(Ly/dx)+1)
 
 x = np.linspace(0,Lx,Nx)
 y = np.linspace(0,Ly,Ny)
@@ -223,12 +223,12 @@ for n in range(1,len(time)-1):
     
     # Next step
     P[:,:,n+1] = P_now[:,:]
-    
-    print(n);
+
+    #print(n);
     
     
 
-plt.imshow(np.log(abs(P[:,:,-1])), cmap="jet", alpha=1, interpolation='none',origin='lower')
+plt.imshow(np.log(abs(P[:,:,-1])+1e-300), cmap="jet", alpha=1, interpolation='none',origin='lower')
     
 
 
