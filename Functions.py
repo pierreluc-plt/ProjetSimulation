@@ -68,7 +68,7 @@ def Boisnez(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff):
         # hauteur est la distance entre le centre du cercle et le cote du rectangle
         hauteur = np.sqrt(coeff**2-(Nx_Bois/2)**2)
         centre_y = centre_bois_y - Ny_Bois/2 + hauteur
-        x_val = np.arange(centre_bois_x-Nx_Bois/2,centre_bois_x+Nx_Bois/2+1)
+        x_val = np.arange(centre_bois_x-(Nx_Bois/2),centre_bois_x+Nx_Bois/2+1)
         for x in x_val:
             pos_y = round(-np.sqrt(int((coeff)**2 - (x-centre_bois_x)**2)) + centre_y)
             # Pour faire la frontiere du demi-cercle
@@ -80,8 +80,10 @@ def Boisnez(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff):
         x_val1 = np.arange(centre_bois_x-Nx_Bois/2+1,centre_bois_x+Nx_Bois/2)
         for x in x_val1:
             pos_y = round(-np.sqrt(int((coeff)**2 - (x-centre_bois_x)**2)) + centre_y)
-            for i in np.arange(1,4):
-                if (Map[int(x),int(pos_y+i)] != 6 and Map[int(x-1),int(pos_y+i)] == 1 and Map[int(x-1),int(pos_y)] == 1 and x < centre_bois_x) or (Map[int(x),int(pos_y+i)] != 6 and Map[int(x+1),int(pos_y+i)] == 1 and Map[int(x+1),int(pos_y)] == 1 and x > centre_bois_x):
+            for i in np.arange(1,5):
+                if (Map[int(x),int(pos_y+i)] != 6 and Map[int(x-1),int(pos_y+i)] == 1 and Map[int(x-1),int(pos_y)] == 1 \
+                    and x < centre_bois_x) or (Map[int(x),int(pos_y+i)] != 6 and Map[int(x+1),int(pos_y+i)] == 1 \
+                                               and Map[int(x+1),int(pos_y)] == 1 and x > centre_bois_x):
                     Map[int(x),int(pos_y+i)]=23
     else:
         print('La variable de forme a ete mal defini.')
@@ -347,6 +349,9 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
             elif Type == 23:
                 Nx23 = (i-centre_bois_x)/coeff
                 Ny23 = (j-centre_bois_y)/coeff
+                Norm=Nx23**2+Ny23**2
+                Nx23=Nx23/Norm
+                Ny23=Ny23/Norm
                 Coefficient = Coeff_Frontiere(gamma_eau, gamma_bois, Nx23, Ny23)
             else:
                 Coefficient = Dict_Coeff[Type]

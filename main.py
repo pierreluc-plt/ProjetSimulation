@@ -40,7 +40,7 @@ N_PML = 5
 centre_bois_x = 60
 centre_bois_y = 60
 # Longueur en x du bois (en points)
-Nx_Bois = 10
+Nx_Bois = 26
 Ny_Bois = 40
 
 # Emplacement de la source
@@ -54,7 +54,7 @@ S_y = 30
 omega = 1e2 
 
 # Intensité de la source (arbitraire)
-p_source = 1e2
+p_source = 1e10
 
 # Eau
 rho_eau = 998.3
@@ -78,10 +78,10 @@ gamma_eau = rho_eau * (alpha_eau * B_eau + 1j * omega)
 gamma_bois = rho_bois * (alpha_bois * B_bois + 1j * omega)
 
 ## Paramètres modifiables pour l'exécution du code
-forme = 'triangle'
-coeff = 2*np.pi/4
-#forme = 'cercle'
-#coeff = 11
+# forme = 'triangle'
+# coeff = 2*np.pi/6
+forme = 'cercle'
+coeff = Nx_Bois/2
 
 # Pour faire le code à 9 points ou pas
 Neuf_points = True
