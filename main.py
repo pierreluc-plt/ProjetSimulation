@@ -54,11 +54,11 @@ S_y = 30
 omega = 1e2 
 
 # Intensité de la source (arbitraire)
-p_source = 1e10
+p_source = -1e10
 
 # Eau
 rho_eau = 998.3
-alpha_eau = 1.18 * 0.0001
+alpha_eau = 1.18 * 0.0
 B_eau = 2.15e9
 
 # Bois
@@ -78,10 +78,10 @@ gamma_eau = rho_eau * (alpha_eau * B_eau + 1j * omega)
 gamma_bois = rho_bois * (alpha_bois * B_bois + 1j * omega)
 
 ## Paramètres modifiables pour l'exécution du code
-# forme = 'triangle'
-# coeff = 2*np.pi/6
-forme = 'cercle'
-coeff = Nx_Bois/2
+forme = 'triangle'
+coeff = 2*np.pi/6.2
+# forme = 'cercle'
+# coeff = Nx_Bois/2
 
 # Pour faire le code à 9 points ou pas
 Neuf_points = True

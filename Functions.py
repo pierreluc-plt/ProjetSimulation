@@ -433,19 +433,24 @@ def Plots_Results(MapSol,MapSolSB,Display_Map,Interpolation="none"):
     ax[1][0].imshow(np.transpose(Display_Map), alpha=1, cmap="jet", interpolation="none")
     ax[1][0].set_title("La map physique")
 
-    ax[0][0].imshow(np.transpose(np.log(abs((MapSol)) + 1e-300)), cmap="gist_heat", alpha=1, interpolation=Interpolation)
+    ax[0][0].imshow(np.transpose(np.log10(np.real(MapSol)-1.2*np.min(np.real(MapSol)))), cmap="jet", alpha=1, interpolation=Interpolation)
     ax[0][0].set_title("Distribution  avec bois")
+    heatmap = ax[0][0].pcolor(np.transpose(np.log10(np.real(MapSol)-1.2*np.min(np.real(MapSol)))), cmap="jet")
 
-    ax[0][1].imshow(np.transpose((np.log(abs(MapSolSB)) + 1e-250)), alpha=1.0, cmap="gist_heat", interpolation=Interpolation)
+    # legend
+    cbar = plt.colorbar(heatmap)
+
+    ax[0][1].imshow(np.transpose(np.log10(np.real(MapSolSB)-1.2*np.min(np.real(MapSolSB)))), alpha=1.0, cmap="jet", interpolation=Interpolation)
     ax[0][1].set_title("Distribution  sans bois")
 
-    Diff = abs(np.real(MapSol)) - abs(np.real(MapSolSB))
+    Diff = -((np.real(MapSol)) -(np.real(MapSolSB)))
     #Diff = Diff[(S_x - 15):(S_x + 15), (S_y - 15):(S_y + 15)]
     Diff = Diff + 2 * abs(np.min(Diff))
     Diff = np.log(Diff)
 
-    ax[1][1].imshow(np.transpose(Diff), cmap="gist_heat", alpha=1, interpolation=Interpolation)
+    ax[1][1].imshow(np.transpose(Diff), cmap="jet", alpha=1, interpolation=Interpolation)
     ax[1][1].imshow(np.transpose(Display_Map), cmap="binary", alpha=0.1, interpolation="none")
+    ax[1][1].set_title("Différence entre les deux distributions")
     plt.show()
 
 
