@@ -315,8 +315,8 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
 
     # Cas 20 à 22 (triangle)
     # Cas 20
-    Nx20 = -np.cos(coeff/2)
-    Ny20 = -np.sin(coeff/2)
+    Nx20 = -np.cos(coeff/2) #-
+    Ny20 = -np.sin(coeff/2) # -
     Coeff20= Coeff_Frontiere(gamma_eau, gamma_bois, Nx20, Ny20)
     # Cas 21
     Nx21 = np.cos(coeff/2)
