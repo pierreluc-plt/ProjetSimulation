@@ -50,7 +50,9 @@ S_y = 30
 ## Paramètres des milieux:
 
 # Fréquence d'oscillation de la source
-omega = 1e2
+    # Mandat demande entre 100 Hz et 10 kHz
+omega = 1e2 
+
 # Intensité de la source (arbitraire)
 p_source = 1e2
 
@@ -63,6 +65,10 @@ B_eau = 2.15e9
 rho_bois = 640.72
 alpha_bois = 3.2e-4 * 0.1
 B_bois = 10e9
+
+# Vitesse du son
+v_eau = np.sqrt(B_eau/rho_eau)
+v_bois = np.sqrt(B_bois/rho_bois)
 
 # Paramètres calculés
 k2_eau = rho_eau * (omega ** 2 / B_eau + 2j * omega * alpha_eau)
