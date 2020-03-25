@@ -83,12 +83,12 @@ gamma_eau = rho_eau * (alpha_eau * B_eau + 1j * omega)
 gamma_bois = rho_bois * (alpha_bois * B_bois + 1j * omega)
 
 ## Paramètres modifiables pour l'exécution du code
-#forme = 'triangle'
+forme = 'triangle'
 # coeff doit être en radian et supérieur à 0 et inférieur à pi
-#coeff = 2*np.pi/6.2
-forme = 'cercle'
+coeff = np.pi/4
+#forme = 'cercle'
 # coeff dois être égal ou supérieur à Nx_Bois/2
-coeff = Nx_Bois/2
+#coeff = Nx_Bois/2
 
 # Pour faire le code à 9 points ou pas
 Neuf_points = True
@@ -118,6 +118,6 @@ if __name__ == "__main__":
 
     Plots_Results(MapSol, MapSolSB, Display_Map, Interpolation="none")
     
-    surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
+    Surface = surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
 
 

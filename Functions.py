@@ -60,7 +60,8 @@ def Boisnez(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff):
             i+=1
         # Pour ajouter la derniere pointe
         if larg1 == 3:
-            Map[int(centre_bois_x-larg/2),int(centre_bois_y-Ny_Bois/2)-i]=4
+            Map[int(centre_bois_x-(larg1-1)/2+1),int(centre_bois_y-Ny_Bois/2)-i]=4
+            #Map[int(centre_bois_x-larg/2),int(centre_bois_y-Ny_Bois/2)-i]=4
         else:
             Map[int(centre_bois_x-(larg1-2)/2):int(centre_bois_x+(larg1-2)/2),int(centre_bois_y-Ny_Bois/2)-i]=4
             
@@ -101,7 +102,7 @@ def surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, fo
             surf = Nx_Bois
     elif forme == 'cercle':
         if coeff != Nx_Bois/2:
-            coin_pente = (centre_bois_x-Nx_Bois/2)/(np.sqrt(coeff**2 - (centre_bois_x-Nx_Bois/2)**2))
+            coin_pente = (-np.sqrt(coeff**2 - (Nx_Bois/2)**2))/(centre_bois_x-Nx_Bois/2)
             S_pente = (centre_bois_y-Ny_Bois/2 - S_y)/(centre_bois_x-Nx_Bois/2 - S_x)
         if coeff == Nx_Bois/2 or S_pente > coin_pente:
             #calcul arc
