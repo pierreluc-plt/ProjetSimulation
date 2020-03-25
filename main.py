@@ -1,15 +1,16 @@
 ## Importationsdes fonctions
 import numpy as np
-from IPython.display import Image
-import matplotlib.pyplot as plt
-import scipy.sparse.csc, scipy.sparse.linalg
-import time
+#from IPython.display import Image
+#import matplotlib.pyplot as plt
+#import scipy.sparse.csc, scipy.sparse.linalg
+#import time
 
 # Importations des fonctions personalisées
+#Pas besoin de les importer*****************************
+#from Functions import Bois,PML,Source,Coeff_Frontiere,Coeff_PML,p,Source_Cylindrique,Construction_Map,Construction_A,\
+    #Resolution, Plots_Results
 
-from Functions import Bois,PML,Source,Coeff_Frontiere,Coeff_PML,p,Source_Cylindrique,Construction_Map,Construction_A,\
-    Resolution, Plots_Results
-
+from Functions import Source_Cylindrique,Construction_Map,Construction_A,Resolution,Plots_Results,surface_directe
 
 
 # Fonction dépendant de Nx
@@ -39,13 +40,17 @@ N_PML = 5
 # Emplacement du bois
 centre_bois_x = 60
 centre_bois_y = 60
-# Longueur en x du bois (en points)
+# Longueur en x,y du bois (en points)
 Nx_Bois = 26
 Ny_Bois = 40
 
 # Emplacement de la source
 S_x = 30
 S_y = 30
+
+# Emplacement du détecteur
+D_x = 30
+D_y = 60
 
 ## Paramètres des milieux:
 
@@ -78,10 +83,12 @@ gamma_eau = rho_eau * (alpha_eau * B_eau + 1j * omega)
 gamma_bois = rho_bois * (alpha_bois * B_bois + 1j * omega)
 
 ## Paramètres modifiables pour l'exécution du code
-forme = 'triangle'
-coeff = 2*np.pi/6.2
-# forme = 'cercle'
-# coeff = Nx_Bois/2
+#forme = 'triangle'
+# coeff doit être en radian et supérieur à 0 et inférieur à pi
+#coeff = 2*np.pi/6.2
+forme = 'cercle'
+# coeff dois être égal ou supérieur à Nx_Bois/2
+coeff = Nx_Bois/2
 
 # Pour faire le code à 9 points ou pas
 Neuf_points = True
@@ -102,13 +109,15 @@ if __name__ == "__main__":
     Map,MapSB,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,plot=True)
 
     A,A_SB, b= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,
-                              Map,MapSB,Source_Map,coeff,centre_bois_x,centre_bois_y)
+                              Map,MapSB,Source_Map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois)
 
 
 
 
-    MapSol,MapSolSB=Resolution(A,A_SB,b,Nx,Ny)
+    MapSol,MapSolSB,P_detecteur=Resolution(A,A_SB,b,Nx,Ny,D_x,D_y)
 
     Plots_Results(MapSol, MapSolSB, Display_Map, Interpolation="none")
+    
+    surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
 
 
