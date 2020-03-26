@@ -59,7 +59,7 @@ D_y = 60
 omega = 1e2 
 
 # Intensité de la source (arbitraire)
-p_source = -1e10
+p_source = -1
 
 # Eau
 rho_eau = 998.3
@@ -108,15 +108,13 @@ if __name__ == "__main__":
 
     Map,MapSB,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,plot=True)
 
-    A,A_SB, b= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,
+    A,A_SB,b,b_TFSF= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,
                               Map,MapSB,Source_Map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois)
 
 
+    MapSol,MapSolSB,MapSol_TFSF,P_detecteur=Resolution(A,A_SB,b,b_TFSF,Nx,Ny,D_x,D_y)
 
-
-    MapSol,MapSolSB,P_detecteur=Resolution(A,A_SB,b,Nx,Ny,D_x,D_y)
-
-    Plots_Results(MapSol, MapSolSB, Display_Map, Interpolation="none")
+    Plots_Results(MapSol, MapSolSB, MapSol_TFSF, Display_Map, Interpolation="none")
     
     surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
 
