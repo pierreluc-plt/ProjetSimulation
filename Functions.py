@@ -280,7 +280,7 @@ def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,co
 def Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False):
         Source_Map = np.zeros([Nx, Ny], dtype=np.complex)
         h = dx
-        r_max = 8 * h
+        r_max = Nx * h
         ## Pourrait probablement être intégré dans la construction de A...
         for i in range(Nx):
             for j in range(Ny):
@@ -402,6 +402,18 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
 
     # Matrice sans bois
     A_SB = np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
+    Q=np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
+
+
+    # Mask function
+    Q_map = Map - MapSB
+
+    Q_map[Q_map > 0] = 1
+
+    where_0 = np.where(Q_map == 0)
+    where_1 = np.where(Q_map == 1)
+    Q_map[where_0] = 1
+    Q_map[where_1] = 0
 
     for i in range(Nx):
         for j in range(Ny):
@@ -428,23 +440,17 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
             if SourceCylindrique==True:
                 b[L] = Source_Map[i, j] * h ** 2 * rho_eau * p_source
 
+            Q[L,L]=Q_map[i,j]
+
     # Mask function
-    Q = Map - MapSB
-    Q[Q > 0] = 1
-    
-    where_0 = np.where(Q == 0)
-    where_1 = np.where(Q == 1)
-    Q[where_0] = 1
-    Q[where_1] = 0
-    Q = np.array(Q).flatten('F')
-    Q = np.diag(Q)
-    
+
     # Source vector for TF/SF
     A_sp = scipy.sparse.csc_matrix(A)
     Q_sp = scipy.sparse.csc_matrix(Q)
     b_TFSF = (Q_sp.dot(A_sp) - A_sp.dot(Q_sp)).dot(b)
-    
-    return A, A_SB, b, b_TFSF
+
+
+    return A, A_SB, b, b_TFSF,Q
 
 def Resolution(A,A_SB,b,b_TFSF,Nx,Ny,D_x,D_y):
 
@@ -497,7 +503,7 @@ def Plots_Results(MapSol,MapSolSB,MapSol_TFSF,Display_Map,Interpolation="none"):
     Diff = Diff + 2 * abs(np.min(Diff))
     Diff = np.log(Diff)
 
-    ax[1][1].imshow(np.transpose(MapSol_TFSF), cmap="jet", alpha=1, interpolation=Interpolation)
+    ax[1][1].imshow(np.transpose(np.real(MapSol_TFSF)), cmap="jet", alpha=1, interpolation=Interpolation)
     ax[1][1].imshow(np.transpose(Display_Map), cmap="binary", alpha=0.1, interpolation="none")
     ax[1][1].set_title("Différence entre les deux distributions")
     plt.show()
