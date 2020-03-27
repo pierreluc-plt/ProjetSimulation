@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 #from Functions import Bois,PML,Source,Coeff_Frontiere,Coeff_PML,p,Source_Cylindrique,Construction_Map,Construction_A,\
     #Resolution, Plots_Results
 
-from Functions import Source_Cylindrique,Construction_Map,Construction_A,Resolution,Plots_Results,surface_directe
+from Functions import Source_Cylindrique,Construction_Map,Construction_A,Resolution,Plots_Results,surface_directe,Surface_equivalente
 
 
 # Fonction dépendant de Nx
@@ -125,6 +125,8 @@ if __name__ == "__main__":
     
 
     #Surface = surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
+    
+    #SER = Surface_equivalente(Nx_Bois,Ny_Bois,forme,coeff,P_incident,P_scattered,V_incident,Surface)
 
 
 

@@ -49,16 +49,32 @@ def Boisnez(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff):
         hauteur = Nx_Bois/(2*np.tan(coeff/2))
         larg = Nx_Bois
         i=0
+        up=1
+        larg2 = larg
         while int(larg) > 1:
-            # On met toute la pointe en bois
-            Map[int(centre_bois_x-larg/2):int(centre_bois_x+larg/2)+1,int(centre_bois_y-Ny_Bois/2)-i]=2
-            # On ajoute le contour
-            Map[int(centre_bois_x-larg/2),int(centre_bois_y-Ny_Bois/2)-i]=20
-            Map[int(centre_bois_x+larg/2),int(centre_bois_y-Ny_Bois/2)-i]=21
+            if up == 1:
+                # On met toute la pointe en bois
+                Map[int(centre_bois_x-larg/2):int(centre_bois_x+larg/2)+1,int(centre_bois_y-Ny_Bois/2)-i]=2
+                # On ajoute le contour
+                Map[int(centre_bois_x-larg/2),int(centre_bois_y-Ny_Bois/2)-i]=20
+                Map[int(centre_bois_x+larg/2),int(centre_bois_y-Ny_Bois/2)-i]=21
+            else:
+                Map[int(centre_bois_x-larg/2),int(centre_bois_y-Ny_Bois/2)-i]=20
+                Map[int(centre_bois_x+larg/2),int(centre_bois_y-Ny_Bois/2)-i]=21
             larg1 = larg +1
-            larg = round(2*(hauteur-i)*np.tan(coeff/2))
+            larg2 = larg
             i+=1
+            larg = round(2*(hauteur-i)*np.tan(coeff/2))
+            if (larg == larg2-2) or (larg == larg2-1) or (larg == larg2):
+                up=1
+            else:
+                i-=1
+                larg = larg2 - 1
+                up=0
+                
         # Pour ajouter la derniere pointe
+        if up == 0:
+            i+=1
         if larg1 == 3:
             Map[int(centre_bois_x-(larg1-1)/2+1),int(centre_bois_y-Ny_Bois/2)-i]=4
             #Map[int(centre_bois_x-larg/2),int(centre_bois_y-Ny_Bois/2)-i]=4
@@ -90,32 +106,131 @@ def Boisnez(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff):
         print('La variable de forme a ete mal defini.')
     return Map
 
+# Calcul surface du demi-cercle
+def surfdemicercle(S_x,S_y,centre_bois_x,centre_cercle_y,Nx_Bois,Ny_Bois,centre_bois_y,coeff):
+    limite_pente = (-(-2*S_y*centre_bois_x+2*centre_bois_x*centre_cercle_y+2*S_x*(S_y-centre_cercle_y))+(np.sqrt((-2*S_y*centre_bois_x+2*centre_bois_x*centre_cercle_y+2*S_x*(S_y-centre_cercle_y))**2 - (4*(2*S_x*centre_bois_x+coeff**2-centre_bois_x**2-S_x**2)*(coeff**2-(S_y-centre_cercle_y)**2)))))/(2*(2*S_x*centre_bois_x+coeff**2-centre_bois_x**2-S_x**2))
+    limite_b = S_y - limite_pente*S_x
+    limite_x = (centre_bois_x-limite_pente*(limite_b - centre_cercle_y))/(limite_pente**2 + 1)
+    limite_y = limite_x*limite_pente + limite_b
+    surf = 2*coeff*np.arcsin((np.sqrt((limite_x - centre_bois_x-Nx_Bois/2)**2 + (centre_bois_y-Ny_Bois/2 - limite_y)**2))/(2*coeff))
+    return surf
+
+# Calcul coin_pente
+def coinpente(S_y,Nx_Bois,Ny_Bois,centre_bois_y,coeff,cote):
+    if coeff != Nx_Bois/2 and S_y > centre_bois_y - Ny_Bois/2:
+        coin_pente = cote*(Nx_Bois/2)/(-np.sqrt(coeff**2 - (Nx_Bois/2)**2))
+    elif coeff == Nx_Bois/2 and S_y > centre_bois_y - Ny_Bois/2:
+        coin_pente = -999*cote
+    elif coeff != Nx_Bois/2 and S_y <= centre_bois_y - Ny_Bois/2:
+        coin_pente = cote*(Nx_Bois/2)/(np.sqrt(coeff**2 - (Nx_Bois/2)**2))
+    else:
+        coin_pente = 999*cote
+    return coin_pente
+
 # Surface en contact direct avec la source
 def surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff):
-    if forme == 'triangle':
-        y_min = centre_bois_y - Ny_Bois/2 + (centre_bois_x-Nx_Bois/2-S_x)*np.tan(coeff/2)
-        if S_y <= y_min:
-            surf = (Nx_Bois/2)/(np.sin(coeff/2))
-        elif S_y > y_min and S_y <= (centre_bois_y + Ny_Bois/2):
-            surf = 0
-        else:
-            surf = Nx_Bois
-    elif forme == 'cercle':
-        if coeff != Nx_Bois/2:
-            coin_pente = (-np.sqrt(coeff**2 - (Nx_Bois/2)**2))/(centre_bois_x-Nx_Bois/2)
-            S_pente = (centre_bois_y-Ny_Bois/2 - S_y)/(centre_bois_x-Nx_Bois/2 - S_x)
-        if coeff == Nx_Bois/2 or S_pente > coin_pente:
-            #calcul arc
-            limite_pente = (S_x*(S_y-centre_bois_y)+coeff*np.sqrt(S_x**2+(S_y-centre_bois_y)**2 - coeff**2))/(S_x**2 - coeff**2)
-            limite_b = S_y - limite_pente*S_x
-            limite_y = (-limite_pente*(limite_b - centre_bois_y))/(limite_pente**2 + 1)
-            limite_x = (limite_y - limite_b)/limite_pente
-            surf = 2*coeff*np.arcsin((np.sqrt((limite_x - centre_bois_x-Nx_Bois/2)**2 + (centre_bois_y-Ny_Bois/2 - limite_y)**2))/(2*coeff))
-        elif S_pente <= coin_pente and S_y <= (centre_bois_y + Ny_Bois/2):
-            surf = 0
-        else:
-            surf = Nx_Bois
-    surface = Ny_Bois + surf
+    if S_x < (centre_bois_x-Nx_Bois/2):
+        if forme == 'triangle':
+            y_min = centre_bois_y - Ny_Bois/2 + (centre_bois_x-Nx_Bois/2-S_x)/np.tan(coeff/2)
+            y_max = centre_bois_y - Ny_Bois/2 - Nx_Bois/(2*np.tan(coeff/2)) - (centre_bois_x-S_x)/np.tan(coeff/2)
+            if S_y <= y_max:
+                surf = 2*(Nx_Bois/2)/(np.sin(coeff/2))
+            elif S_y <= y_min and S_y > y_max:
+                surf = (Nx_Bois/2)/(np.sin(coeff/2))
+            elif S_y > y_min and S_y <= (centre_bois_y + Ny_Bois/2):
+                surf = 0
+            else:
+                surf = Nx_Bois
+        elif forme == 'cercle':
+            centre_cercle_y = centre_bois_y - Ny_Bois/2 + np.sqrt(coeff**2-(Nx_Bois/2)**2)
+            coin_pente = coinpente(S_y,Nx_Bois,Ny_Bois,centre_bois_y,coeff,1)
+            
+            if S_y > centre_bois_y - Ny_Bois/2:
+                S_pente = (centre_bois_y-Ny_Bois/2 - S_y)/(centre_bois_x-Nx_Bois/2 - S_x)
+                if S_pente > coin_pente:
+                    #calcul arc
+                    surf = surfdemicercle(S_x,S_y,centre_bois_x,centre_cercle_y,Nx_Bois,Ny_Bois,centre_bois_y,coeff)
+                elif S_pente <= coin_pente and S_y <= (centre_bois_y + Ny_Bois/2):
+                    surf = 0
+                else:
+                    surf = Nx_Bois
+            elif S_y <= centre_bois_y - Ny_Bois/2 and S_y >= centre_cercle_y-coeff:
+                surf = surfdemicercle(S_x,S_y,centre_bois_x,centre_cercle_y,Nx_Bois,Ny_Bois,centre_bois_y,coeff)
+            elif S_y < centre_cercle_y-coeff:
+                S_pente = (centre_bois_y-Ny_Bois/2 - S_y)/(centre_bois_x+Nx_Bois/2 - S_x)
+                if S_pente < coin_pente:
+                    surf = surfdemicercle(S_x,S_y,centre_bois_x,centre_cercle_y,Nx_Bois,Ny_Bois,centre_bois_y,coeff)
+                else:
+                    surf = 2*coeff*np.arcsin(Nx_Bois/(2*coeff))
+        surface = Ny_Bois + surf
+    elif S_x >= (centre_bois_x-Nx_Bois/2) and S_x <= (centre_bois_x+Nx_Bois/2):
+        if forme == 'triangle':
+            if S_x < centre_bois_x:
+                y_max = centre_bois_y - Ny_Bois/2 - Nx_Bois/(2*np.tan(coeff/2)) - (centre_bois_x-S_x)/np.tan(coeff/2)
+                if S_y < y_max:
+                    surface = 2*(Nx_Bois/2)/(np.sin(coeff/2))
+                elif S_y < (centre_bois_y-Ny_Bois/2) and S_y >= y_max:
+                    surface = (Nx_Bois/2)/(np.sin(coeff/2))
+                elif S_y > (centre_bois_y+Ny_Bois/2):
+                    surface = Nx_Bois
+            elif S_x == centre_bois_x:
+                if S_y < (centre_bois_y-Ny_Bois/2):
+                    surface = 2*(Nx_Bois/2)/(np.sin(coeff/2))
+                elif S_y > (centre_bois_y+Ny_Bois/2):
+                    surface = Nx_Bois
+            elif S_x > centre_bois_x:
+                y_max = centre_bois_y - Ny_Bois/2 - Nx_Bois/(2*np.tan(coeff/2)) - (S_x-centre_bois_x)/np.tan(coeff/2)
+                if S_y < y_max:
+                    surface = 2*(Nx_Bois/2)/(np.sin(coeff/2))
+                elif S_y < (centre_bois_y-Ny_Bois/2) and S_y >= y_max:
+                    surface = (Nx_Bois/2)/(np.sin(coeff/2))
+                elif S_y > (centre_bois_y+Ny_Bois/2):
+                    surface = Nx_Bois
+
+        elif forme == 'cercle':
+            centre_cercle_y = centre_bois_y - Ny_Bois/2 + np.sqrt(coeff**2-(Nx_Bois/2)**2)
+            if S_y > (centre_bois_y+Ny_Bois/2):
+                surface = Nx_Bois
+            elif S_x < centre_bois_x:
+                surface = surfdemicercle(S_x,S_y,centre_bois_x,centre_cercle_y,Nx_Bois,Ny_Bois,centre_bois_y,coeff)
+            elif S_x == centre_bois_x:
+                surface = 2*coeff*np.arcsin(Nx_Bois/(2*coeff))
+            elif S_x > centre_bois_x:
+                surface = 2*coeff*np.arcsin(Nx_Bois/(2*coeff)) - surfdemicercle(S_x,S_y,centre_bois_x,centre_cercle_y,Nx_Bois,Ny_Bois,centre_bois_y,coeff)
+    elif S_x > (centre_bois_x+Nx_Bois/2):
+        if forme == 'triangle':
+            y_min = centre_bois_y - Ny_Bois/2 + (S_x - centre_bois_x-Nx_Bois/2)/np.tan(coeff/2)
+            y_max = centre_bois_y - Ny_Bois/2 - Nx_Bois/(2*np.tan(coeff/2)) - (S_x-centre_bois_x)/np.tan(coeff/2)
+            if S_y <= y_max:
+                surf = 2*(Nx_Bois/2)/(np.sin(coeff/2))
+            elif S_y <= y_min and S_y > y_max:
+                surf = (Nx_Bois/2)/(np.sin(coeff/2))
+            elif S_y > y_min and S_y <= (centre_bois_y + Ny_Bois/2):
+                surf = 0
+            else:
+                surf = Nx_Bois
+        elif forme == 'cercle':
+            centre_cercle_y = centre_bois_y - Ny_Bois/2 + np.sqrt(coeff**2-(Nx_Bois/2)**2)
+            coin_pente = coinpente(S_y,Nx_Bois,Ny_Bois,centre_bois_y,coeff,-1)
+            
+            if S_y > centre_bois_y - Ny_Bois/2:
+                S_pente = (centre_bois_y-Ny_Bois/2 - S_y)/(S_x - centre_bois_x-Nx_Bois/2)
+                if S_pente < coin_pente:
+                    #calcul arc
+                    surf = 2*coeff*np.arcsin(Nx_Bois/(2*coeff)) - surfdemicercle(S_x,S_y,centre_bois_x,centre_cercle_y,Nx_Bois,Ny_Bois,centre_bois_y,coeff)
+                elif S_pente >= coin_pente and S_y <= (centre_bois_y + Ny_Bois/2):
+                    surf = 0
+                else:
+                    surf = Nx_Bois
+            elif S_y <= centre_bois_y - Ny_Bois/2 and S_y >= centre_cercle_y-coeff:
+                surf = 2*coeff*np.arcsin(Nx_Bois/(2*coeff)) - surfdemicercle(S_x,S_y,centre_bois_x,centre_cercle_y,Nx_Bois,Ny_Bois,centre_bois_y,coeff)
+            elif S_y < centre_cercle_y-coeff:
+                S_pente = -(centre_bois_y-Ny_Bois/2 - S_y)/(S_x - centre_bois_x+Nx_Bois/2)
+                if S_pente < coin_pente:
+                    surf = 2*coeff*np.arcsin(Nx_Bois/(2*coeff)) - surfdemicercle(S_x,S_y,centre_bois_x,centre_cercle_y,Nx_Bois,Ny_Bois,centre_bois_y,coeff)
+                else:
+                    surf = 2*coeff*np.arcsin(Nx_Bois/(2*coeff))
+        surface = Ny_Bois + surf
     return surface
 
 
@@ -510,7 +625,7 @@ def Plots_Results(MapSol,MapSolSB,MapSol_TFSF,Display_Map,Interpolation="none"):
     plt.show()
 
 
-def Surface_equivalent(P_incident,P_scattered,V_incident,V_scattered,Surface):
+def Surface_equivalente(Nx_Bois,Ny_Bois,forme,coeff,P_incident,P_scattered,V_incident,Surface):
     """
     P_incident: Pression initiale/ incident sur le bateau 
         (En réalité la puissance sonore donné par Aire * Pression * Vitesse.
@@ -521,6 +636,13 @@ def Surface_equivalent(P_incident,P_scattered,V_incident,V_scattered,Surface):
     V_scattered: Volume/Aire du bateau
     Surface: Surface/Périmètre étant exposé au P_incident    
     """
+    
+    if forme == 'triangle':
+        aire_nez = Nx_Bois**2/(2*np.tan(coeff/2))
+    elif forme == 'cercle':
+        angle = 2*np.arcsin(Nx_Bois/(2*coeff))
+        aire_nez = 0.5*coeff**2*(angle-np.sin(angle))
+        V_scattered = Nx_Bois*Ny_Bois + aire_nez
     
     SER = Surface*(P_scattered/V_scattered)/(P_incident/V_incident)
     
