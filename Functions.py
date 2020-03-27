@@ -281,7 +281,7 @@ def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,co
 def Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False):
         Source_Map = np.zeros([Nx, Ny], dtype=np.complex)
         h = dx
-        r_max = 8 * h
+        r_max = Nx * h
         ## Pourrait probablement être intégré dans la construction de A...
         for i in range(Nx):
             for j in range(Ny):
@@ -365,6 +365,7 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
 
     A = np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
     b = np.zeros([Nx * Ny], dtype=complex)
+    b_TFSF = np.zeros([Nx * Ny], dtype=complex)
 
     for i in range(Nx):
         for j in range(Ny):
@@ -402,6 +403,18 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
 
     # Matrice sans bois
     A_SB = np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
+    Q=np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
+
+
+    # Mask function
+    Q_map = Map - MapSB
+
+    Q_map[Q_map > 0] = 1
+
+    where_0 = np.where(Q_map == 0)
+    where_1 = np.where(Q_map == 1)
+    Q_map[where_0] = 1
+    Q_map[where_1] = 0
 
     for i in range(Nx):
         for j in range(Ny):
@@ -428,18 +441,31 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
             if SourceCylindrique==True:
                 b[L] = Source_Map[i, j] * h ** 2 * rho_eau * p_source
 
-    return A, A_SB,b
+            Q[L,L]=Q_map[i,j]
 
-def Resolution(A,A_SB,b,Nx,Ny,D_x,D_y):
+    # Mask function
+
+    # Source vector for TF/SF
+    A_sp = scipy.sparse.csc_matrix(A)
+    Q_sp = scipy.sparse.csc_matrix(Q)
+    b_TFSF = (Q_sp.dot(A_sp) - A_sp.dot(Q_sp)).dot(b)
+
+
+    return A, A_SB, b, b_TFSF,Q
+
+def Resolution(A,A_SB,b,b_TFSF,Nx,Ny,D_x,D_y):
 
     ## Calcul du temps d'inversion
     MapSol = np.zeros([Nx, Ny], dtype=complex)
     MapSolSB = np.zeros([Nx, Ny], dtype=complex)
+    MapSol_TFSF = np.zeros([Nx, Ny], dtype=complex)
 
     t0 = time.perf_counter()
 
     solSB = scipy.sparse.linalg.spsolve(scipy.sparse.csc_matrix(A_SB), b)
     sol = scipy.sparse.linalg.spsolve(scipy.sparse.csc_matrix(A), b)
+    sol_TFSF = scipy.sparse.linalg.spsolve(scipy.sparse.csc_matrix(A), b_TFSF)
+    
     t = time.perf_counter() - t0
     print("Temps pour inverser les deux matrices: {:.3f} s.".format(t))
     # Création map de solution
@@ -448,14 +474,15 @@ def Resolution(A,A_SB,b,Nx,Ny,D_x,D_y):
         for j in range(Ny):
             MapSol[i, j] = sol[int(p(i, j,Nx))]
             MapSolSB[i, j] = solSB[int(p(i, j,Nx))]
+            MapSol_TFSF[i, j] = sol_TFSF[int(p(i, j,Nx))]
     
     #Intensite au detecteur
     P_detecteur = MapSol[D_x, D_y]
 
-    return MapSol, MapSolSB, P_detecteur
+    return MapSol, MapSolSB, MapSol_TFSF, P_detecteur
 
 
-def Plots_Results(MapSol,MapSolSB,Display_Map,Interpolation="none"):
+def Plots_Results(MapSol,MapSolSB,MapSol_TFSF,Display_Map,Interpolation="none"):
     ## Création des figures pour la distribution
     fig, ax = plt.subplots(2, 2, figsize=(25, 25))
 
@@ -477,7 +504,7 @@ def Plots_Results(MapSol,MapSolSB,Display_Map,Interpolation="none"):
     Diff = Diff + 2 * abs(np.min(Diff))
     Diff = np.log(Diff)
 
-    ax[1][1].imshow(np.transpose(Diff), cmap="jet", alpha=1, interpolation=Interpolation)
+    ax[1][1].imshow(np.transpose(np.real(MapSol_TFSF)), cmap="jet", alpha=1, interpolation=Interpolation)
     ax[1][1].imshow(np.transpose(Display_Map), cmap="binary", alpha=0.1, interpolation="none")
     ax[1][1].set_title("Différence entre les deux distributions")
     plt.show()

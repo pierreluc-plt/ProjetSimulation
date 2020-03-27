@@ -1,7 +1,7 @@
 ## Importationsdes fonctions
 import numpy as np
 #from IPython.display import Image
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 #import scipy.sparse.csc, scipy.sparse.linalg
 #import time
 
@@ -59,11 +59,11 @@ D_y = 60
 omega = 1e2 
 
 # Intensité de la source (arbitraire)
-p_source = -1e10
+p_source = -1e12
 
 # Eau
 rho_eau = 998.3
-alpha_eau = 1.18 * 0.0
+alpha_eau = 1.18 * 0.00000
 B_eau = 2.15e9
 
 # Bois
@@ -94,7 +94,7 @@ coeff = np.pi/4
 Neuf_points = True
 
 # Décider si on utilise un source cylindrique
-SourceCylindrique=False
+SourceCylindrique=True
 Source_Map=np.ones([Nx,Ny])
 # Main:
 
@@ -108,16 +108,23 @@ if __name__ == "__main__":
 
     Map,MapSB,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,plot=True)
 
-    A,A_SB, b= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,
+    A,A_SB,b,b_TFSF,Q1= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,
                               Map,MapSB,Source_Map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois)
 
 
+    MapSol,MapSolSB,MapSol_TFSF,P_detecteur=Resolution(A,A_SB,b,b_TFSF,Nx,Ny,D_x,D_y)
+
+    ## Temporaire:
+    plt.figure()
+    plt.title("Scattered field")
+    plt.imshow(np.transpose((np.real(MapSol_TFSF))), alpha=1.0, cmap="jet")
+    plt.show()
 
 
-    MapSol,MapSolSB,P_detecteur=Resolution(A,A_SB,b,Nx,Ny,D_x,D_y)
-
-    Plots_Results(MapSol, MapSolSB, Display_Map, Interpolation="none")
+    # Plots_Results(MapSol, MapSolSB, MapSol_TFSF, Display_Map, Interpolation="none")
     
-    Surface = surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
+
+    #Surface = surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
+
 
 
