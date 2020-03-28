@@ -1,15 +1,16 @@
 ## Importationsdes fonctions
 import numpy as np
-from IPython.display import Image
+#from IPython.display import Image
 import matplotlib.pyplot as plt
-import scipy.sparse.csc, scipy.sparse.linalg
-import time
+#import scipy.sparse.csc, scipy.sparse.linalg
+#import time
 
 # Importations des fonctions personalisées
+#Pas besoin de les importer*****************************
+#from Functions import Bois,PML,Source,Coeff_Frontiere,Coeff_PML,p,Source_Cylindrique,Construction_Map,Construction_A,\
+    #Resolution, Plots_Results
 
-from Functions import Bois,PML,Source,Coeff_Frontiere,Coeff_PML,p,Source_Cylindrique,Construction_Map,Construction_A,\
-    Resolution, Plots_Results
-
+from Functions import Source_Cylindrique,Construction_Map,Construction_A,Resolution,Plots_Results,surface_directe,Surface_equivalente
 
 
 # Fonction dépendant de Nx
@@ -39,30 +40,40 @@ N_PML = 5
 # Emplacement du bois
 centre_bois_x = 60
 centre_bois_y = 60
-# Longueur en x du bois (en points)
-Nx_Bois = 10
+# Longueur en x,y du bois (en points)
+Nx_Bois = 26
 Ny_Bois = 40
 
 # Emplacement de la source
 S_x = 30
 S_y = 30
 
+# Emplacement du détecteur
+D_x = 30
+D_y = 60
+
 ## Paramètres des milieux:
 
 # Fréquence d'oscillation de la source
-omega = 1e2
+    # Mandat demande entre 100 Hz et 10 kHz
+omega = 1e2 
+
 # Intensité de la source (arbitraire)
-p_source = 1e2
+p_source = -1e12
 
 # Eau
 rho_eau = 998.3
-alpha_eau = 1.18 * 0.0001
+alpha_eau = 1.18 * 0.00000
 B_eau = 2.15e9
 
 # Bois
 rho_bois = 640.72
 alpha_bois = 3.2e-4 * 0.1
 B_bois = 10e9
+
+# Vitesse du son
+v_eau = np.sqrt(B_eau/rho_eau)
+v_bois = np.sqrt(B_bois/rho_bois)
 
 # Paramètres calculés
 k2_eau = rho_eau * (omega ** 2 / B_eau + 2j * omega * alpha_eau)
@@ -72,14 +83,18 @@ gamma_eau = rho_eau * (alpha_eau * B_eau + 1j * omega)
 gamma_bois = rho_bois * (alpha_bois * B_bois + 1j * omega)
 
 ## Paramètres modifiables pour l'exécution du code
-
-
+forme = 'triangle'
+# coeff doit être en radian et supérieur à 0 et inférieur à pi
+coeff = np.pi/4
+#forme = 'cercle'
+# coeff dois être égal ou supérieur à Nx_Bois/2
+#coeff = Nx_Bois/2
 
 # Pour faire le code à 9 points ou pas
 Neuf_points = True
 
 # Décider si on utilise un source cylindrique
-SourceCylindrique=False
+SourceCylindrique=True
 Source_Map=np.ones([Nx,Ny])
 # Main:
 
@@ -91,16 +106,27 @@ if __name__ == "__main__":
     if SourceCylindrique==True:
         Source_Map=Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False)
 
-    Map,MapSB,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,S_x,S_y,dx,N_PML,plot=True)
+    Map,MapSB,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,plot=True)
 
-    A,A_SB, b= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,
-                              Map,MapSB,Source_Map)
-
-
+    A,A_SB,b,b_TFSF,Q1= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,
+                              Map,MapSB,Source_Map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois)
 
 
-    MapSol,MapSolSB=Resolution(A,A_SB,b,Nx,Ny)
+    MapSol,MapSolSB,MapSol_TFSF,P_detecteur=Resolution(A,A_SB,b,b_TFSF,Nx,Ny,D_x,D_y)
 
-    Plots_Results(MapSol, MapSolSB, Display_Map, Interpolation="none")
+    ## Temporaire:
+    plt.figure()
+    plt.title("Scattered field")
+    plt.imshow(np.transpose((np.real(MapSol_TFSF))), alpha=1.0, cmap="jet")
+    plt.show()
+
+
+    # Plots_Results(MapSol, MapSolSB, MapSol_TFSF, Display_Map, Interpolation="none")
+    
+
+    #Surface = surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
+    
+    #SER = Surface_equivalente(Nx_Bois,Ny_Bois,forme,coeff,P_incident,P_scattered,V_incident,Surface)
+
 
 
