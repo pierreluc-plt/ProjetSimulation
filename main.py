@@ -56,19 +56,31 @@ D_y = 25
 
 # Fréquence d'oscillation de la source
     # Mandat demande entre 100 Hz et 10 kHz
+<<<<<<< HEAD
 omega = 5e3
+=======
+omega = 500
+>>>>>>> master
 
 # Intensité de la source (arbitraire)
 p_source = -1e12
 
 # Eau
 rho_eau = 998.3
+<<<<<<< HEAD
 alpha_eau = 1.18 *1e-7
+=======
+alpha_eau = 1.18 *0
+>>>>>>> master
 B_eau = 2.15e9
 
 # Bois
 rho_bois = 640.72
+<<<<<<< HEAD
 alpha_bois = 3.2e-4
+=======
+alpha_bois = 3.2e-4 * 0.01
+>>>>>>> master
 B_bois = 10e9
 
 # Vitesse du son
@@ -108,6 +120,7 @@ if __name__ == "__main__":
     if SourceCylindrique==True:
         Source_Map=Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False)
 
+<<<<<<< HEAD
     Map,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,\
                                       plot=False,PML_mode=PML_mode, Bateau=True, Boisnez_bool=True)
     alpha_Map=Construction_alpha_Map(Nx,Ny,alpha_eau, alpha_PML,N_PML)
@@ -120,6 +133,9 @@ if __name__ == "__main__":
     #            Q_map[i,j]=1
     Q_map[Display_Map==0]=0
     Q_map[Display_Map == 3] = 0
+=======
+    Map,MapSB,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,plot=False)
+>>>>>>> master
 
 
     A_sp,b_TFSF= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,
