@@ -235,7 +235,7 @@ def surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, fo
 
 
 # Emplacement des PML
-def PML(Map, N_PML):
+def PML1(Map, N_PML):
     """Cette fonction vient placer les points de PML selon la convention décrite ci haut"""
     # Point 11
     Map[0:N_PML, -N_PML:] = 11
@@ -255,10 +255,23 @@ def PML(Map, N_PML):
     Map[0:N_PML, N_PML:-N_PML] = 18
     return Map
 
+# Emplacement des PML
+def PML2(Map, N_PML):
+    """Cette fonction vient placer les points de PML selon la convention décrite ci haut"""
+    # Point 11
+    Map[1:-1, 1:N_PML] = 19
+    # Point 12
+    Map[1:N_PML, 1:-1] = 19
+    # Point 13
+    Map[1:-1, -N_PML:-1] = 19
+    # Point 14
+    Map[-N_PML:-1, 1:-1] = 19
+
+    return Map
 
 # Emplacement de la source
 def Source(Map, S_x, S_y):
-    Map[S_x, S_y] = 19
+    Map[S_x, S_y] = 0
     return Map
 
 
@@ -352,24 +365,71 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
                  1 / Gamma_x ** 2, 1, 0]
     return Coeff
 
+# Coefficients pour les PML
+def Coeff_PML2(Type, h, Nx, Ny,omega,B_eau,alpha,rho_eau):
+    k2_eau = rho_eau * (omega ** 2 / B_eau + 2j * omega * alpha)
+    k2=k2_eau
+    if Type == 11:
+        Coeff = [0,0 ,1,-2 ,2+h**2*k2,-2,1,0,0]
+    if Type == 12:
+        Coeff = [0,1,1,-2 ,-1+h**2*k2,1,0,0,0]
+    if Type == 13:
+        Coeff = [1,-2,1,-2,2+h**2*k2,0,0,0,0]
+    if Type == 14:
+        Coeff = [1,-2,0,1,-1+h**2*k2,0,0,1,0]
+    if Type == 15:
+        Coeff = [1,-2,0,0,2+h**2*k2,0,0,-2,1]
+    if Type == 16:
+        Coeff = [0,1,0,0,-1+h**2*k2,1,0,-2,1]
+    if Type == 17:
+        Coeff = [0,0,0,0,2+h**2*k2,-2,1,-2,1]
+    if Type == 18:
+        Coeff = [0,0,0,1,-1+h**2*k2,-2,1,1,0]
+    if Type == 19:
+        Coeff = [0,1,0,1,-4+h**2*k2,1,0,1,0]
 
-def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,plot=True):
+
+    return Coeff
+
+def Construction_alpha_Map(Nx,Ny,alpha_eau, alpha_PML,N_PML):
+    grid = np.ones([Nx, Ny])
+    d_alpha = (alpha_PML - alpha_eau) / N_PML
+    grid = grid * alpha_eau
+    for i in range(N_PML):
+        grid[-i - 1, i:-i - 1] = (N_PML - i+2) * d_alpha
+        grid[i, i:-i - 1] = (N_PML - i+2) * d_alpha
+        grid[i:-i - 1, i] = (N_PML - i+2) * d_alpha
+        grid[i:-i - 1, -i - 1] = (N_PML - i+2) * d_alpha
+        grid[Nx - (i + 1), Ny - (i + 1)] = (N_PML - i+2) * d_alpha
+    alpha_Map=grid
+    return alpha_Map
+
+def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,plot=True, \
+                     PML_mode=1,Bateau=True, Boisnez_bool=True):
     Map = np.ones([Nx, Ny])
     # Création de la map avec les points
-    Map = Bois(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois)
-    Map=Boisnez(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
-    Map = PML(Map, N_PML)
+    if Bateau==True:
+        Map = Bois(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois)
+        if Boisnez_bool==True:
+            Map=Boisnez(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
+    if PML_mode==1:
+        Map = PML1(Map, N_PML)
+    if PML_mode==2:
+        Map = PML1(Map, N_PML)
+        Map= PML2(Map, N_PML)
+
     Map = Source(Map, S_x, S_y)
 
-    ## Map Sans bois
-    MapSB = np.ones([Nx, Ny])
-    MapSB = PML(MapSB, N_PML)
-    MapSB = Source(MapSB, S_x, S_y)
+
 
     Display_Map = np.copy(Map)
-    Display_Map[np.logical_and(Map > 10, Map < 19)] = 0
-    Display_Map[np.logical_and(Map > 2, Map < 11)] = 3
-    Display_Map[Map == 19] = 4
+    # Les deux cas de PML
+    Display_Map[np.logical_and(Map > 10, Map <= 19)] = 0
+    Display_Map[Map == 19] = 0
+
+    Display_Map[np.logical_or(np.logical_and(Map >= 2, Map < 11),Map>=20)] = 3
+    ## La source
+    Display_Map[Map == 0] = 5
 
     if plot==True:
 
@@ -389,7 +449,7 @@ def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,co
         ax[1].set_ylabel("y", fontsize=20)
         plt.show()
 
-    return Map, MapSB,Display_Map
+    return Map, Display_Map
 
 
 
@@ -403,11 +463,11 @@ def Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False):
                 r = np.sqrt((i - S_x) ** 2 + (j - S_y) ** 2) * h
                 if r < r_max:
                     if r == 0:
-                        Source_Map[i, j] = 1 / np.sqrt(h / 2)
+                        Source_Map[i, j] = 1
                     else:
                         val = np.exp(1j * k2_eau * r) / np.sqrt(r)
                         # Vérifier si on devrait pas prendre la -1j*k2_eau*r
-                        Source_Map[i, j] = np.exp(1j * np.real(k2_eau) * r) / np.sqrt(r)
+                        Source_Map[i, j] = np.exp(1j *2*np.real(k2_eau) * r) / np.sqrt(r)
 
         if plot==True:
             fig, ax = plt.subplots(1, 1, figsize=(20, 8))
@@ -421,7 +481,8 @@ def Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False):
         return Source_Map
 
 
-def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,Map,MapSB,Source_Map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois):
+def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,Map,\
+                   Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois,  alpha_Map, omega , B_eau,PML_mode=1,):
     h=dx
     # **********************Construction de la matrice A************************
 
@@ -473,22 +534,37 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
     # Cas 11 à 18 (PML):Dans les fonctions suivantes
 
     # Cas 19 (source): Option 2
-    Coeff19 = [0, 1, 0, 1, -(4 - k2_eau * h ** 2), 1, 0, 1, 0]
+    #Coeff19 = [0, 1, 0, 1, -(4 - k2_eau * h ** 2), 1, 0, 1, 0]
 
     Dict_Coeff = {1: Coeff1, 2: Coeff2, 3: Coeff3, 4: Coeff4, 5: Coeff5, 6: Coeff6, 7: Coeff7, 8: Coeff8, 9: Coeff9,
-                  10: Coeff10, 19: Coeff19,20:Coeff20,21:Coeff21}
+                  10: Coeff10,20:Coeff20,21:Coeff21}
 
     A = np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
     b = np.zeros([Nx * Ny], dtype=complex)
     b_TFSF = np.zeros([Nx * Ny], dtype=complex)
 
+    # Matrice sans bois
+    Q = np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
+
+    if PML_mode==2:
+        PML_Range=19
+    elif PML_mode==1:
+        PML_Range=18
+
+
     for i in range(Nx):
         for j in range(Ny):
             L = p(i, j, Nx)
 
-            Type = Map[i, j]
-            if np.logical_and(Type >= 11, Type <= 18):
-                Coefficient = Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau)
+            Type = int(Map[i, j])
+
+            if np.logical_and(Type >= 11, Type <= PML_Range):
+                if PML_mode==1:
+                    Coefficient = Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau)
+                if PML_mode==2:
+                    alpha=alpha_Map[i,j]
+                    Coefficient =Coeff_PML2(Type, h, Nx, Ny, omega,B_eau, alpha,rho_eau)
+
             elif Type == 22:
                 Nx22 = (i-centre_bois_x)/coeff
                 # Coordonnées en y du centre du cercle
@@ -496,7 +572,8 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
                 Ny22 = (j-centre_y)/coeff
                 Coefficient = Coeff_Frontiere(gamma_eau, gamma_bois, Nx22, Ny22)
             else:
-                Coefficient = Dict_Coeff[Type]
+                if Type!=0:
+                    Coefficient = Dict_Coeff[Type]
 
             if np.logical_and(np.logical_or(Type == 1, Type == 2), Neuf_points == True):
                 Position = [p(i - 1, j - 1, Nx), p(i - 1, j, Nx), p(i - 1, j + 1, Nx), p(i, j - 1, Nx), p(i, j, Nx),
@@ -509,77 +586,29 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
 
             for k, pos in enumerate(Position):
                 if np.logical_and(pos >= 0, pos < (Nx * Ny)):
+
                     A[L, int(pos)] = Coefficient[k]
 
-                    if Type==19:
-                        b[L]=h**2*rho_eau*p_source
             if SourceCylindrique==True:
                 b[L] = Source_Map[i, j] * h ** 2 * rho_eau * p_source
-
-    # Matrice sans bois
-    A_SB = np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
-    Q=np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
+            Q[L, L] = Q_map[i, j]
 
 
-    # Mask function
-    Q_map = Map - MapSB
-
-    Q_map[Q_map > 0] = 1
-
-    where_0 = np.where(Q_map == 0)
-    where_1 = np.where(Q_map == 1)
-    Q_map[where_0] = 1
-    Q_map[where_1] = 0
-
-    for i in range(Nx):
-        for j in range(Ny):
-            L = p(i, j, Nx)
-
-            Type = MapSB[i, j]
-            if np.logical_and(Type >= 11, Type <= 18):
-                Coefficient = Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau)
-            else:
-                Coefficient = Dict_Coeff[Type]
-
-            if np.logical_and(np.logical_or(Type == 1, Type == 2), Neuf_points == True):
-                Position = [p(i - 1, j - 1, Nx), p(i - 1, j, Nx), p(i - 1, j + 1, Nx), p(i, j - 1, Nx), p(i, j, Nx),
-                            p(i, j + 1, Nx), p(i + 1, j - 1, Nx), p(i + 1, j, Nx), p(i + 1, j + 1, Nx)]
-            else:
-                Position = [p(i - 2, j, Nx), p(i - 1, j, Nx), p(i, j - 2, Nx), p(i, j - 1, Nx), p(i, j, Nx),
-                            p(i + 1, j, Nx), p(i + 2, j, Nx),
-                            p(i, j + 1, Nx), p(i, j + 2, Nx)]
-            for k, pos in enumerate(Position):
-                if np.logical_and(pos >= 0, pos < (Nx * Ny)):
-                    A_SB[L, int(pos)] = Coefficient[k]
-                    if Type==19:
-                        b[L]=h**2*rho_eau*p_source
-            if SourceCylindrique==True:
-                b[L] = Source_Map[i, j] * h ** 2 * rho_eau * p_source
-
-            Q[L,L]=Q_map[i,j]
-
-    # Mask function
-
-    # Source vector for TF/SF
     A_sp = scipy.sparse.csc_matrix(A)
     Q_sp = scipy.sparse.csc_matrix(Q)
     b_TFSF = (Q_sp.dot(A_sp) - A_sp.dot(Q_sp)).dot(b)
 
 
-    return A, A_SB, b, b_TFSF,Q
+    return A_sp,b_TFSF
 
-def Resolution(A,A_SB,b,b_TFSF,Nx,Ny,D_x,D_y):
+def Resolution(A_sp, b_TFSF,Nx,Ny,D_x,D_y):
 
-    ## Calcul du temps d'inversion
-    MapSol = np.zeros([Nx, Ny], dtype=complex)
-    MapSolSB = np.zeros([Nx, Ny], dtype=complex)
     MapSol_TFSF = np.zeros([Nx, Ny], dtype=complex)
 
     t0 = time.perf_counter()
 
-    solSB = scipy.sparse.linalg.spsolve(scipy.sparse.csc_matrix(A_SB), b)
-    sol = scipy.sparse.linalg.spsolve(scipy.sparse.csc_matrix(A), b)
-    sol_TFSF = scipy.sparse.linalg.spsolve(scipy.sparse.csc_matrix(A), b_TFSF)
+
+    sol_TFSF = scipy.sparse.linalg.spsolve(A_sp, b_TFSF)
     
     t = time.perf_counter() - t0
     print("Temps pour inverser les deux matrices: {:.3f} s.".format(t))
@@ -587,14 +616,12 @@ def Resolution(A,A_SB,b,b_TFSF,Nx,Ny,D_x,D_y):
 
     for i in range(Nx):
         for j in range(Ny):
-            MapSol[i, j] = sol[int(p(i, j,Nx))]
-            MapSolSB[i, j] = solSB[int(p(i, j,Nx))]
             MapSol_TFSF[i, j] = sol_TFSF[int(p(i, j,Nx))]
     
     #Intensite au detecteur
-    P_detecteur = MapSol[D_x, D_y]
+    P_detecteur = MapSol_TFSF[D_x, D_y]
 
-    return MapSol, MapSolSB, MapSol_TFSF, P_detecteur
+    return MapSol_TFSF, P_detecteur
 
 
 def Plots_Results(MapSol,MapSolSB,MapSol_TFSF,Display_Map,Interpolation="none"):
@@ -614,14 +641,14 @@ def Plots_Results(MapSol,MapSolSB,MapSol_TFSF,Display_Map,Interpolation="none"):
     ax[0][1].imshow(np.transpose(np.log10(np.real(MapSolSB)-1.2*np.min(np.real(MapSolSB)))), alpha=1.0, cmap="jet", interpolation=Interpolation)
     ax[0][1].set_title("Distribution  sans bois")
 
-<<<<<<< HEAD
+
     Diff = abs(MapSol) - abs(MapSolSB)
-=======
+
     Diff = -((np.real(MapSol)) -(np.real(MapSolSB)))
->>>>>>> 470c532bf6c1eefc87d2db3f3b3819718adfe8a7
     #Diff = Diff[(S_x - 15):(S_x + 15), (S_y - 15):(S_y + 15)]
     Diff = Diff + 2 * abs(np.min(Diff))
     Diff = np.log(Diff)
+
 
     ax[1][1].imshow(np.transpose(np.real(MapSol_TFSF)), cmap="jet", alpha=1, interpolation=Interpolation)
     ax[1][1].imshow(np.transpose(Display_Map), cmap="binary", alpha=0.1, interpolation="none")

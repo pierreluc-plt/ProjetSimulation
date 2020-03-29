@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 #from Functions import Bois,PML,Source,Coeff_Frontiere,Coeff_PML,p,Source_Cylindrique,Construction_Map,Construction_A,\
     #Resolution, Plots_Results
 
-from Functions import Source_Cylindrique,Construction_Map,Construction_A,Resolution,Plots_Results,surface_directe,Surface_equivalente
+from Functions import Source_Cylindrique,Construction_Map,Construction_A,Resolution,Plots_Results,surface_directe,Surface_equivalente,Construction_alpha_Map
 
 
 # Fonction dépendant de Nx
@@ -35,40 +35,40 @@ Ly = Lx
 dy = dx
 h=dx
 # Épaisseur (en points de la couche de PML)
-N_PML = 5
+N_PML = 12
 
 # Emplacement du bois
-centre_bois_x = 60
+centre_bois_x = 65
 centre_bois_y = 60
 # Longueur en x,y du bois (en points)
-Nx_Bois = 26
-Ny_Bois = 40
+Nx_Bois = 20
+Ny_Bois = 20
 
 # Emplacement de la source
-S_x = 30
-S_y = 30
+S_x = 35
+S_y = 58
 
 # Emplacement du détecteur
-D_x = 30
-D_y = 60
+D_x = 23
+D_y = 25
 
 ## Paramètres des milieux:
 
 # Fréquence d'oscillation de la source
     # Mandat demande entre 100 Hz et 10 kHz
-omega = 1e2 
+omega = 1e2
 
 # Intensité de la source (arbitraire)
 p_source = -1e12
 
 # Eau
 rho_eau = 998.3
-alpha_eau = 1.18 * 0.00000
+alpha_eau = 1.18 *1e-6
 B_eau = 2.15e9
 
 # Bois
 rho_bois = 640.72
-alpha_bois = 3.2e-4 * 0.1
+alpha_bois = 3.2e-4
 B_bois = 10e9
 
 # Vitesse du son
@@ -98,6 +98,8 @@ SourceCylindrique=True
 Source_Map=np.ones([Nx,Ny])
 # Main:
 
+PML_mode=2  # Mode 2: PML avec le alpha map
+alpha_PML=5*alpha_eau
 
 
 if __name__ == "__main__":
@@ -106,18 +108,41 @@ if __name__ == "__main__":
     if SourceCylindrique==True:
         Source_Map=Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False)
 
-    Map,MapSB,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,plot=True)
+    Map,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,\
+                                      plot=False,PML_mode=PML_mode, Bateau=True, Boisnez_bool=False)
+    alpha_Map=Construction_alpha_Map(Nx,Ny,alpha_eau, alpha_PML,N_PML)
+    #Temporaire
+    SF_radius=10
+    Q_map=np.ones([Nx,Ny])
+    #for i in range(Nx):
+    #    for j in range(Ny):
+    #        if ((i-D_x)**2+(j-D_y)**2)<SF_radius**2:
+    #            Q_map[i,j]=1
+    Q_map[Display_Map==0]=0
+    Q_map[Display_Map == 3] = 0
 
-    A,A_SB,b,b_TFSF,Q1= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,
-                              Map,MapSB,Source_Map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois)
+
+    A_sp,b_TFSF= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,
+                              Map,Source_Map ,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois, alpha_Map,omega,B_eau, PML_mode=PML_mode)
 
 
-    MapSol,MapSolSB,MapSol_TFSF,P_detecteur=Resolution(A,A_SB,b,b_TFSF,Nx,Ny,D_x,D_y)
+    MapSol_TFSF,P_detecteur=Resolution(A_sp, b_TFSF,Nx,Ny,D_x,D_y)
 
     ## Temporaire:
-    plt.figure()
-    plt.title("Scattered field")
-    plt.imshow(np.transpose((np.real(MapSol_TFSF))), alpha=1.0, cmap="jet")
+
+    fig,ax=plt.subplots(2,2,figsize=(16,8))
+    ax[1][1].set_title("Scattered field seulement")
+    SF_only=(MapSol_TFSF*Q_map)[N_PML+5:-N_PML-5,N_PML+5:-N_PML-5]
+    SF_only[SF_only==0]=np.nan
+    ax[1][1].imshow(np.transpose((np.real(SF_only))), alpha=1.0, cmap="jet")
+    ax[1][0].set_title("Solution")
+    ax[1][0].imshow(np.transpose((np.real(MapSol_TFSF))), alpha=1.0, cmap="jet")
+
+    ax[0][0].set_title("Display Map")
+    ax[0][0].imshow(np.transpose((Display_Map)), alpha=1.0, cmap="jet")
+
+    ax[0][1].set_title("Région TF et Région SF en rouge")
+    ax[0][1].imshow(np.transpose((Q_map)), alpha=1.0, cmap="jet")
     plt.show()
 
 
