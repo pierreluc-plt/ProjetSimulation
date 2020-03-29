@@ -291,78 +291,153 @@ def Coeff_Frontiere(gamma1, gamma2, nx, ny):
 
 # Coefficients pour les PML
 def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
-    k = np.sqrt(k2_eau)
+    k = np.sqrt(k2_eau) # p-e seulement la partie réelle de k2eau?
+
     x = i * h + h / 2
     y = j * h + h / 2  # Pour éviter les divisions par 0 ?
+    Ny=Ny-1
+    Nx=Nx-1
 
-    if Type == 11:
-        x0 = 0
-        y0 = h * Ny  # Ny ou Ny-1 ???
-        Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-        Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-        Gamma_x = 1 + 1j / k / (abs(x0 - x))
-        Gamma_y = 1 + 1j / k / (abs(y0 - y))
-        Coeff = [0, 0, 1 / Gamma_y ** 2, (-h * Beta_y - 2) / Gamma_y ** 2,
-                 k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) + ((1 - h * Beta_x) / Gamma_x ** 2), \
-                 (h * Beta_x - 2) / Gamma_x ** 2, 1 / Gamma_x ** 2, 0, 0]
-    if Type == 12:
-        y0 = h * Ny  # Ny ou Ny-1 ???
-        Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-        Gamma_y = 1 + 1j / k / (abs(y0 - y))
-        Coeff = [0, 1, 1 / Gamma_y ** 2, -(2 + h * Beta_y) / Gamma_y ** 2,
-                 k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) - 2, \
-                 1, 0, 0, 0]
+    if np.logical_or(np.logical_or(i==0,i==Nx-1),np.logical_or(j==0,j==Ny-1)):
 
-    if Type == 13:
-        x0 = h * Nx  # Nx ou Nx-1 ???
-        y0 = h * Ny  # Ny ou Ny-1 ???
-        Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-        Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-        Gamma_x = 1 + 1j / k / (abs(x0 - x))
-        Gamma_y = 1 + 1j / k / (abs(y0 - y))
-        Coeff = [1 / Gamma_x ** 2, -(h * Beta_x + 2) / Gamma_x ** 2, 1 / Gamma_y ** 2, -(h * Beta_y + 2) / Gamma_y ** 2, \
-                 k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) + ((1 + h * Beta_x) / Gamma_x ** 2), 0, 0, 0, 0]
-    if Type == 14:
-        x0 = h * Nx  # Nx ou Nx-1 ???
-        Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-        Gamma_x = 1 + 1j / k / (abs(x0 - x))
-        Coeff = [1 / Gamma_x ** 2, -(h * Beta_x + 2) / Gamma_x ** 2, 0, 1, \
-                 k ** 2 * h ** 2 - 2 + ((1 + h * Beta_x) / Gamma_x ** 2), 0, 0, 1, 0]
+    #Couche sur les bords extérieurs
+        if Type == 11:
+            x0 = 0
+            y0 = h * (Ny-1)  # Ny ou Ny-1 ???
+            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+            Coeff = [0, 0, 1 / Gamma_y ** 2, (-h * Beta_y - 2) / Gamma_y ** 2,
+                     k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) + ((1 - h * Beta_x) / Gamma_x ** 2), \
+                     (h * Beta_x - 2) / Gamma_x ** 2, 1 / Gamma_x ** 2, 0, 0]
+        if Type == 12:
+            y0 = h * Ny  # Ny ou Ny-1 ???
+            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+            Coeff = [0, 1, 1 / Gamma_y ** 2, -(2 + h * Beta_y) / Gamma_y ** 2,
+                     k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) - 2, \
+                     1, 0, 0, 0]
 
-    if Type == 15:
-        x0 = h * Nx  # Nx ou Nx-1 ???
-        y0 = 0
-        Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-        Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-        Gamma_x = 1 + 1j / k / (abs(x0 - x))
-        Gamma_y = 1 + 1j / k / (abs(y0 - y))
-        Coeff = [-1 / Gamma_x ** 2, -(h * Beta_x + 2) / Gamma_x ** 2, 0, 0, \
-                 k ** 2 * h ** 2 + ((1 - h * Beta_y) / Gamma_y ** 2) + ((1 + h * Beta_x) / Gamma_x ** 2), 0, 0,
-                 (h * Beta_y - 2) / Gamma_y ** 2, 1 / Gamma_y ** 2]
-    if Type == 16:
-        y0 = 0
-        Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-        Gamma_y = 1 + 1j / k / (abs(y0 - y))
-        Coeff = [0, 1, 0, 0, \
-                 k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) - 2, 1, 0, (h * Beta_y - 2) / Gamma_y ** 2,
-                 1 / Gamma_y ** 2]
+        if Type == 13:
+            x0 = h * Nx  # Nx ou Nx-1 ???
+            y0 = h * Ny  # Ny ou Ny-1 ???
+            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+            Coeff = [1 / Gamma_x ** 2, -(h * Beta_x + 2) / Gamma_x ** 2, 1 / Gamma_y ** 2, -(h * Beta_y + 2) / Gamma_y ** 2, \
+                     k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) + ((1 + h * Beta_x) / Gamma_x ** 2), 0, 0, 0, 0]
+        if Type == 14:
+            x0 = h * Nx  # Nx ou Nx-1 ???
+            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Coeff = [1 / Gamma_x ** 2, -(h * Beta_x + 2) / Gamma_x ** 2, 0, 1, \
+                     k ** 2 * h ** 2 - 2 + ((1 + h * Beta_x) / Gamma_x ** 2), 0, 0, 1, 0]
 
-    if Type == 17:
-        x0 = 0
-        y0 = 0
-        Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-        Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-        Gamma_x = 1 + 1j / k / (abs(x0 - x))
-        Gamma_y = 1 + 1j / k / (abs(y0 - y))
-        Coeff = [0, 0, 0, 0, k ** 2 * h ** 2 + ((1 - h * Beta_y) / Gamma_y ** 2) + ((1 - h * Beta_x) / Gamma_x ** 2), \
-                 (h * Beta_x - 2) / Gamma_x ** 2, 1 / Gamma_x ** 2, (h * Beta_y - 2) / Gamma_y ** 2, 1 / Gamma_y ** 2]
+        if Type == 15:
+            x0 = h * Nx  # Nx ou Nx-1 ???
+            y0 = 0
+            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+            Coeff = [-1 / Gamma_x ** 2, -(h * Beta_x + 2) / Gamma_x ** 2, 0, 0, \
+                     k ** 2 * h ** 2 + ((1 - h * Beta_y) / Gamma_y ** 2) + ((1 + h * Beta_x) / Gamma_x ** 2), 0, 0,
+                     (h * Beta_y - 2) / Gamma_y ** 2, 1 / Gamma_y ** 2]
+        if Type == 16:
+            y0 = 0
+            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+            Coeff = [0, 1, 0, 0, \
+                     k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) - 2, 1, 0, (h * Beta_y - 2) / Gamma_y ** 2,
+                     1 / Gamma_y ** 2]
 
-    if Type == 18:
-        x0 = 0
-        Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-        Gamma_x = 1 + 1j / k / (abs(x0 - x))
-        Coeff = [0, 0, 0, 1, k ** 2 * h ** 2 - 2 + ((1 - h * Beta_x) / Gamma_x ** 2), (h * Beta_x - 2) / Gamma_x ** 2,
-                 1 / Gamma_x ** 2, 1, 0]
+        if Type == 17:
+            x0 = 0
+            y0 = 0
+            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+            Coeff = [0, 0, 0, 0, k ** 2 * h ** 2 + ((1 - h * Beta_y) / Gamma_y ** 2) + ((1 - h * Beta_x) / Gamma_x ** 2), \
+                     (h * Beta_x - 2) / Gamma_x ** 2, 1 / Gamma_x ** 2, (h * Beta_y - 2) / Gamma_y ** 2, 1 / Gamma_y ** 2]
+
+        if Type == 18:
+            x0 = 0
+            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Coeff = [0, 0, 0, 1, k ** 2 * h ** 2 - 2 + ((1 - h * Beta_x) / Gamma_x ** 2), (h * Beta_x - 2) / Gamma_x ** 2,
+                     1 / Gamma_x ** 2, 1, 0]
+
+    else:
+        if Type == 11:
+            x0 = 0
+            y0 = h * (Ny)  # Ny ou Ny-1 ???
+            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+
+        if Type == 12:
+            y0 = h * Ny  # Ny ou Ny-1 ???
+            Beta_x = 0
+            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Gamma_x = 1
+            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+
+
+        if Type == 13:
+            x0 = h * Nx  # Nx ou Nx-1 ???
+            y0 = h * Ny  # Ny ou Ny-1 ???
+            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+
+        if Type == 14:
+            x0 = h * Nx  # Nx ou Nx-1 ???
+            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Beta_y = 0
+            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Gamma_y = 1
+
+
+        if Type == 15:
+            x0 = h * Nx  # Nx ou Nx-1 ???
+            y0 = 0
+            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+
+        if Type == 16:
+            y0 = 0
+            Beta_x = 0
+            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Gamma_x = 1
+            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+
+
+        if Type == 17:
+            x0 = 0
+            y0 = 0
+            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+
+        if Type == 18:
+            x0 = 0
+
+            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Beta_y = 0
+            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Gamma_y = 1 
+
+
+        Coeff = [0,-Beta_x/2/h/(Gamma_x**2)+1/(h**2)/(Gamma_x**2) ,0,-Beta_y/2/h/(Gamma_y**2)+1/(h**2)/(Gamma_y**2)\
+            ,-2/((Gamma_x*h)**2)-2/((Gamma_x*h)**2)+k**2,Beta_x/2/h/(Gamma_x**2)+1/(h**2)/(Gamma_x**2),0,Beta_y/2/h/(Gamma_y**2)+1/(h**2)/(Gamma_y**2),0]
     return Coeff
 
 # Coefficients pour les PML
