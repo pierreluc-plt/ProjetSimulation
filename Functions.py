@@ -737,11 +737,13 @@ def Surface_equivalente(Nx_Bois,Ny_Bois,forme,coeff,P_incident,P_scattered,V_inc
         (En réalité la puissance sonore donné par Aire * Pression * Vitesse.
         Puisque la vitesse est la même est on suppose que l'aire sur lequel ils parcourent
         sont à peu près la même chose, on dit que pression équivaut puissance sonore.)
-    P_scattered: Calculé avec formulation TF/SF
+    P_scattered: Calculé avec formulation TF/SF (somme des pressions des points dans SF)
     V_incident: Volume/Aire incident. Si source ponctuelle, juste prendre dx * dy.
     V_scattered: Volume/Aire du bateau
-    Surface: Surface/Périmètre étant exposé au P_incident    
+    Surface: Surface/Périmètre étant exposé au P_incident   
     """
+    
+    
     
     if forme == 'triangle':
         aire_nez = Nx_Bois**2/(2*np.tan(coeff/2))
