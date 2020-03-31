@@ -56,11 +56,11 @@ def Boisnez(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff):
                 # On met toute la pointe en bois
                 Map[int(centre_bois_x-larg/2):int(centre_bois_x+larg/2)+1,int(centre_bois_y-Ny_Bois/2)-i]=2
                 # On ajoute le contour
-                Map[int(centre_bois_x-larg/2),int(centre_bois_y-Ny_Bois/2)-i]=20
-                Map[int(centre_bois_x+larg/2),int(centre_bois_y-Ny_Bois/2)-i]=21
+                Map[int(centre_bois_x-larg/2),int(centre_bois_y-Ny_Bois/2)-i]=11
+                Map[int(centre_bois_x+larg/2),int(centre_bois_y-Ny_Bois/2)-i]=12
             else:
-                Map[int(centre_bois_x-larg/2),int(centre_bois_y-Ny_Bois/2)-i]=20
-                Map[int(centre_bois_x+larg/2),int(centre_bois_y-Ny_Bois/2)-i]=21
+                Map[int(centre_bois_x-larg/2),int(centre_bois_y-Ny_Bois/2)-i]=11
+                Map[int(centre_bois_x+larg/2),int(centre_bois_y-Ny_Bois/2)-i]=12
             larg1 = larg +1
             larg2 = larg
             i+=1
@@ -89,7 +89,7 @@ def Boisnez(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff):
         for x in x_val:
             pos_y = round(-np.sqrt(int((coeff)**2 - (x-centre_bois_x)**2)) + centre_y)
             # Pour faire la frontiere du demi-cercle
-            Map[int(x),int(pos_y)]=22
+            Map[int(x),int(pos_y)]=13
             if pos_y < (centre_bois_y-Ny_Bois/2+1):
                 # Pour faire l'interieur du demi-cercle
                 Map[int(x),(int(pos_y+1)):int(centre_bois_y-Ny_Bois/2+1)] = 2
@@ -101,7 +101,7 @@ def Boisnez(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff):
                 if (Map[int(x),int(pos_y+i)] != 6 and Map[int(x-1),int(pos_y+i)] == 1 and Map[int(x-1),int(pos_y)] == 1 \
                     and x < centre_bois_x) or (Map[int(x),int(pos_y+i)] != 6 and Map[int(x+1),int(pos_y+i)] == 1 \
                                                and Map[int(x+1),int(pos_y)] == 1 and x > centre_bois_x):
-                    Map[int(x),int(pos_y+i)]=22
+                    Map[int(x),int(pos_y+i)]=13
     else:
         print('La variable de forme a ete mal defini.')
     return Map
@@ -237,35 +237,35 @@ def surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, fo
 # Emplacement des PML
 def PML1(Map, N_PML):
     """Cette fonction vient placer les points de PML selon la convention décrite ci haut"""
-    # Point 11
-    Map[0:N_PML, -N_PML:] = 11
-    # Point 12
-    Map[N_PML:-N_PML, -N_PML:] = 12
-    # Point 13
-    Map[-N_PML:, -N_PML:] = 13
     # Point 14
-    Map[-N_PML:, N_PML:-N_PML] = 14
+    Map[0:N_PML, -N_PML:] = 14
     # Point 15
-    Map[-N_PML:, 0:N_PML] = 15
+    Map[N_PML:-N_PML, -N_PML:] = 15
     # Point 16
-    Map[N_PML:-N_PML, 0:N_PML] = 16
+    Map[-N_PML:, -N_PML:] = 16
     # Point 17
-    Map[0:N_PML, 0:N_PML] = 17
+    Map[-N_PML:, N_PML:-N_PML] = 17
     # Point 18
-    Map[0:N_PML, N_PML:-N_PML] = 18
+    Map[-N_PML:, 0:N_PML] = 18
+    # Point 19
+    Map[N_PML:-N_PML, 0:N_PML] = 19
+    # Point 20
+    Map[0:N_PML, 0:N_PML] = 20
+    # Point 21
+    Map[0:N_PML, N_PML:-N_PML] = 21
     return Map
 
 # Emplacement des PML
 def PML2(Map, N_PML):
     """Cette fonction vient placer les points de PML selon la convention décrite ci haut"""
-    # Point 11
-    Map[1:-1, 1:N_PML] = 19
-    # Point 12
-    Map[1:N_PML, 1:-1] = 19
-    # Point 13
-    Map[1:-1, -N_PML:-1] = 19
     # Point 14
-    Map[-N_PML:-1, 1:-1] = 19
+    Map[1:-1, 1:N_PML] = 22
+    # Point 15
+    Map[1:N_PML, 1:-1] = 22
+    # Point 16
+    Map[1:-1, -N_PML:-1] = 22
+    # Point 17
+    Map[-N_PML:-1, 1:-1] = 22
 
     return Map
 
@@ -301,7 +301,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
     if np.logical_or(np.logical_or(i==0,i==Nx-1),np.logical_or(j==0,j==Ny-1)):
 
     #Couche sur les bords extérieurs
-        if Type == 11:
+        if Type == 14:
             x0 = 0
             y0 = h * (Ny-1)  # Ny ou Ny-1 ???
             Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
@@ -311,7 +311,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
             Coeff = [0, 0, 1 / Gamma_y ** 2, (-h * Beta_y - 2) / Gamma_y ** 2,
                      k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) + ((1 - h * Beta_x) / Gamma_x ** 2), \
                      (h * Beta_x - 2) / Gamma_x ** 2, 1 / Gamma_x ** 2, 0, 0]
-        if Type == 12:
+        if Type == 15:
             y0 = h * Ny  # Ny ou Ny-1 ???
             Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
             Gamma_y = 1 + 1j / k / (abs(y0 - y))
@@ -319,7 +319,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
                      k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) - 2, \
                      1, 0, 0, 0]
 
-        if Type == 13:
+        if Type == 16:
             x0 = h * Nx  # Nx ou Nx-1 ???
             y0 = h * Ny  # Ny ou Ny-1 ???
             Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
@@ -328,14 +328,14 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
             Gamma_y = 1 + 1j / k / (abs(y0 - y))
             Coeff = [1 / Gamma_x ** 2, -(h * Beta_x + 2) / Gamma_x ** 2, 1 / Gamma_y ** 2, -(h * Beta_y + 2) / Gamma_y ** 2, \
                      k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) + ((1 + h * Beta_x) / Gamma_x ** 2), 0, 0, 0, 0]
-        if Type == 14:
+        if Type == 17:
             x0 = h * Nx  # Nx ou Nx-1 ???
             Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
             Gamma_x = 1 + 1j / k / (abs(x0 - x))
             Coeff = [1 / Gamma_x ** 2, -(h * Beta_x + 2) / Gamma_x ** 2, 0, 1, \
                      k ** 2 * h ** 2 - 2 + ((1 + h * Beta_x) / Gamma_x ** 2), 0, 0, 1, 0]
 
-        if Type == 15:
+        if Type == 18:
             x0 = h * Nx  # Nx ou Nx-1 ???
             y0 = 0
             Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
@@ -345,7 +345,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
             Coeff = [-1 / Gamma_x ** 2, -(h * Beta_x + 2) / Gamma_x ** 2, 0, 0, \
                      k ** 2 * h ** 2 + ((1 - h * Beta_y) / Gamma_y ** 2) + ((1 + h * Beta_x) / Gamma_x ** 2), 0, 0,
                      (h * Beta_y - 2) / Gamma_y ** 2, 1 / Gamma_y ** 2]
-        if Type == 16:
+        if Type == 19:
             y0 = 0
             Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
             Gamma_y = 1 + 1j / k / (abs(y0 - y))
@@ -353,7 +353,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
                      k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) - 2, 1, 0, (h * Beta_y - 2) / Gamma_y ** 2,
                      1 / Gamma_y ** 2]
 
-        if Type == 17:
+        if Type == 20:
             x0 = 0
             y0 = 0
             Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
@@ -363,7 +363,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
             Coeff = [0, 0, 0, 0, k ** 2 * h ** 2 + ((1 - h * Beta_y) / Gamma_y ** 2) + ((1 - h * Beta_x) / Gamma_x ** 2), \
                      (h * Beta_x - 2) / Gamma_x ** 2, 1 / Gamma_x ** 2, (h * Beta_y - 2) / Gamma_y ** 2, 1 / Gamma_y ** 2]
 
-        if Type == 18:
+        if Type == 21:
             x0 = 0
             Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
             Gamma_x = 1 + 1j / k / (abs(x0 - x))
@@ -371,7 +371,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
                      1 / Gamma_x ** 2, 1, 0]
 
     else:
-        if Type == 11:
+        if Type == 14:
             x0 = 0
             y0 = h * (Ny)  # Ny ou Ny-1 ???
             Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
@@ -379,7 +379,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
             Gamma_x = 1 + 1j / k / (abs(x0 - x))
             Gamma_y = 1 + 1j / k / (abs(y0 - y))
 
-        if Type == 12:
+        if Type == 15:
             y0 = h * Ny  # Ny ou Ny-1 ???
             Beta_x = 0
             Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
@@ -387,7 +387,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
             Gamma_y = 1 + 1j / k / (abs(y0 - y))
 
 
-        if Type == 13:
+        if Type == 16:
             x0 = h * Nx  # Nx ou Nx-1 ???
             y0 = h * Ny  # Ny ou Ny-1 ???
             Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
@@ -395,7 +395,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
             Gamma_x = 1 + 1j / k / (abs(x0 - x))
             Gamma_y = 1 + 1j / k / (abs(y0 - y))
 
-        if Type == 14:
+        if Type == 17:
             x0 = h * Nx  # Nx ou Nx-1 ???
             Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
             Beta_y = 0
@@ -403,7 +403,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
             Gamma_y = 1
 
 
-        if Type == 15:
+        if Type == 18:
             x0 = h * Nx  # Nx ou Nx-1 ???
             y0 = 0
             Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
@@ -411,7 +411,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
             Gamma_x = 1 + 1j / k / (abs(x0 - x))
             Gamma_y = 1 + 1j / k / (abs(y0 - y))
 
-        if Type == 16:
+        if Type == 19:
             y0 = 0
             Beta_x = 0
             Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
@@ -419,7 +419,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
             Gamma_y = 1 + 1j / k / (abs(y0 - y))
 
 
-        if Type == 17:
+        if Type == 20:
             x0 = 0
             y0 = 0
             Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
@@ -427,7 +427,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
             Gamma_x = 1 + 1j / k / (abs(x0 - x))
             Gamma_y = 1 + 1j / k / (abs(y0 - y))
 
-        if Type == 18:
+        if Type == 21:
             x0 = 0
 
             Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
@@ -444,23 +444,23 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
 def Coeff_PML2(Type, h, Nx, Ny,omega,B_eau,alpha,rho_eau):
     k2_eau = rho_eau * (omega ** 2 / B_eau + 2j * omega * alpha)
     k2=k2_eau
-    if Type == 11:
-        Coeff = [0,0 ,1,-2 ,2+h**2*k2,-2,1,0,0]
-    if Type == 12:
-        Coeff = [0,1,1,-2 ,-1+h**2*k2,1,0,0,0]
-    if Type == 13:
-        Coeff = [1,-2,1,-2,2+h**2*k2,0,0,0,0]
     if Type == 14:
-        Coeff = [1,-2,0,1,-1+h**2*k2,0,0,1,0]
+        Coeff = [0,0 ,1,-2 ,2+h**2*k2,-2,1,0,0]
     if Type == 15:
-        Coeff = [1,-2,0,0,2+h**2*k2,0,0,-2,1]
+        Coeff = [0,1,1,-2 ,-1+h**2*k2,1,0,0,0]
     if Type == 16:
-        Coeff = [0,1,0,0,-1+h**2*k2,1,0,-2,1]
+        Coeff = [1,-2,1,-2,2+h**2*k2,0,0,0,0]
     if Type == 17:
-        Coeff = [0,0,0,0,2+h**2*k2,-2,1,-2,1]
+        Coeff = [1,-2,0,1,-1+h**2*k2,0,0,1,0]
     if Type == 18:
-        Coeff = [0,0,0,1,-1+h**2*k2,-2,1,1,0]
+        Coeff = [1,-2,0,0,2+h**2*k2,0,0,-2,1]
     if Type == 19:
+        Coeff = [0,1,0,0,-1+h**2*k2,1,0,-2,1]
+    if Type == 20:
+        Coeff = [0,0,0,0,2+h**2*k2,-2,1,-2,1]
+    if Type == 21:
+        Coeff = [0,0,0,1,-1+h**2*k2,-2,1,1,0]
+    if Type == 22:
         Coeff = [0,1,0,1,-4+h**2*k2,1,0,1,0]
 
 
@@ -499,29 +499,29 @@ def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,co
 
     Display_Map = np.copy(Map)
     # Les deux cas de PML
-    Display_Map[np.logical_and(Map > 10, Map <= 19)] = 0
-    Display_Map[Map == 19] = 0
+    Display_Map[np.logical_and(Map > 10, Map <= 22)] = 0
+    Display_Map[Map == 22] = 0
 
-    Display_Map[np.logical_or(np.logical_and(Map >= 2, Map < 11),Map>=20)] = 3
+    Display_Map[np.logical_or(np.logical_and(Map >= 2, Map < 14),Map>=11)] = 3
     ## La source
     Display_Map[Map == 0] = 5
 
     if plot==True:
 
-        fig,ax=plt.subplots(1,2,figsize=(20,8))
-        cmap = plt.cm.get_cmap('jet', 19)
+        fig,ax=plt.subplots(1,2,figsize=(11,8))
+        cmap = plt.cm.get_cmap('jet', 22)
 
         ax[0].imshow(np.transpose(Map), cmap=cmap)
-        #cbar = plt.colorbar(ticks=np.arange(1, 20), norm=np.arange(1, 20),ax=ax[0])
-        ax[0].set_title("La carte, chaque couleur=1 type de point", fontsize=12)
-        ax[0].set_xlabel("x", fontsize=20)
-        ax[0].set_ylabel("y", fontsize=20)
+        #cbar = plt.colorbar(ticks=np.arange(1, 11), norm=np.arange(1, 11),ax=ax[0])
+        ax[0].set_title("La carte, chaque couleur=1 type de point", fontsize=15)
+        ax[0].set_xlabel("x", fontsize=11)
+        ax[0].set_ylabel("y", fontsize=11)
 
         #cmap = plt.cm.get_cmap('jet', 5)
         ax[1].imshow(np.transpose(Display_Map), cmap=cmap)
-        ax[1].set_title("Map Physique", fontsize=12)
-        ax[1].set_xlabel("x", fontsize=20)
-        ax[1].set_ylabel("y", fontsize=20)
+        ax[1].set_title("Map Physique", fontsize=15)
+        ax[1].set_xlabel("x", fontsize=11)
+        ax[1].set_ylabel("y", fontsize=11)
         plt.show()
 
     return Map, Display_Map
@@ -545,13 +545,13 @@ def Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False):
                         Source_Map[i, j] = np.exp(1j *2*np.real(k2_eau) * r) / np.sqrt(r)
 
         if plot==True:
-            fig, ax = plt.subplots(1, 1, figsize=(20, 8))
-            cmap = plt.cm.get_cmap('jet', 19)
+            fig, ax = plt.subplots(1, 1, figsize=(11, 8))
+            cmap = plt.cm.get_cmap('jet', 22)
 
             ax.imshow(np.transpose(abs(Source_Map)), cmap=cmap)
-            ax.set_title("La source cylindrique", fontsize=12)
-            ax.set_xlabel("x", fontsize=20)
-            ax.set_ylabel("y", fontsize=20)
+            ax.set_title("La source cylindrique", fontsize=15)
+            ax.set_xlabel("x", fontsize=11)
+            ax.set_ylabel("y", fontsize=11)
             plt.show()
         return Source_Map
 
@@ -570,7 +570,7 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
     else:
         # Version à 9 points
         # [p(i-1,j-1),p(i-1,j) ,p(i-1,j+1),p(i,j-1),p(i,j),p(i,j+1),p(i+1,j-1),p(i+1,j),p(i+1,j+1)]
-        Coeff1 = [1, 4, 1, 4, -20 + 6 * h ** 2 * k2_eau, 4, 1, 4, 1]
+        Coeff1 = [1, 4, 1, 4, -11 + 6 * h ** 2 * k2_eau, 4, 1, 4, 1]
 
     # Cas 2:
     if Neuf_points == True:
@@ -579,7 +579,7 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
 
         # Version à 9 points
         # [p(i-1,j-1),p(i-1,j) ,p(i-1,j+1),p(i,j-1),p(i,j),p(i,j+1),p(i+1,j-1),p(i+1,j),p(i+1,j+1)]
-        Coeff2 = [1, 4, 1, 4, -20 + 6 * h ** 2 * k2_bois, 4, 1, 4, 1]
+        Coeff2 = [1, 4, 1, 4, -11 + 6 * h ** 2 * k2_bois, 4, 1, 4, 1]
 
     # Cas 3 à 10:
 
@@ -593,26 +593,26 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
     Coeff9 = Coeff_Frontiere(gamma_eau, gamma_bois, -1 / np.sqrt(2), 1 / np.sqrt(2))
     Coeff10 = Coeff_Frontiere(gamma_eau, gamma_bois, -1, 0)
 
-    # Cas 20 à 21 (triangle)
-    # Cas 20
-    Nx20 = -np.cos(coeff/2) #-
-    Ny20 = -np.sin(coeff/2) # -
-    Coeff20= Coeff_Frontiere(gamma_eau, gamma_bois, Nx20, Ny20)
-    # Cas 21
-    Nx21 = np.cos(coeff/2)
-    Ny21 = -np.sin(coeff/2)
-    Coeff21= Coeff_Frontiere(gamma_eau, gamma_bois, Nx21, Ny21)
+    # Cas 11 à 12 (triangle)
+    # Cas 11
+    Nx11 = -np.cos(coeff/2) #-
+    Ny11 = -np.sin(coeff/2) # -
+    Coeff11= Coeff_Frontiere(gamma_eau, gamma_bois, Nx11, Ny11)
+    # Cas 12
+    Nx12 = np.cos(coeff/2)
+    Ny12 = -np.sin(coeff/2)
+    Coeff12= Coeff_Frontiere(gamma_eau, gamma_bois, Nx12, Ny12)
     
-    # Cas 22 (Cercle)    
+    # Cas 13 (Cercle)    
     # Voir la boucle plus bas
 
-    # Cas 11 à 18 (PML):Dans les fonctions suivantes
+    # Cas 14 à 21 (PML):Dans les fonctions suivantes
 
-    # Cas 19 (source): Option 2
-    #Coeff19 = [0, 1, 0, 1, -(4 - k2_eau * h ** 2), 1, 0, 1, 0]
+    # Cas 22 (source): Option 2
+    #Coeff22 = [0, 1, 0, 1, -(4 - k2_eau * h ** 2), 1, 0, 1, 0]
 
     Dict_Coeff = {1: Coeff1, 2: Coeff2, 3: Coeff3, 4: Coeff4, 5: Coeff5, 6: Coeff6, 7: Coeff7, 8: Coeff8, 9: Coeff9,
-                  10: Coeff10,20:Coeff20,21:Coeff21}
+                  10: Coeff10,11:Coeff11,12:Coeff12}
 
     A = np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
     b = np.zeros([Nx * Ny], dtype=complex)
@@ -622,9 +622,9 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
     Q = np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
 
     if PML_mode==2:
-        PML_Range=19
+        PML_Range=22
     elif PML_mode==1:
-        PML_Range=18
+        PML_Range=21
 
 
     for i in range(Nx):
@@ -633,19 +633,19 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
 
             Type = int(Map[i, j])
 
-            if np.logical_and(Type >= 11, Type <= PML_Range):
+            if np.logical_and(Type >= 14, Type <= PML_Range):
                 if PML_mode==1:
                     Coefficient = Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau)
                 if PML_mode==2:
                     alpha=alpha_Map[i,j]
                     Coefficient =Coeff_PML2(Type, h, Nx, Ny, omega,B_eau, alpha,rho_eau)
 
-            elif Type == 22:
-                Nx22 = (i-centre_bois_x)/coeff
+            elif Type == 13:
+                Nx13 = (i-centre_bois_x)/coeff
                 # Coordonnées en y du centre du cercle
                 centre_y = centre_bois_y - Ny_Bois/2 + np.sqrt(coeff**2-(Nx_Bois/2)**2)
-                Ny22 = (j-centre_y)/coeff
-                Coefficient = Coeff_Frontiere(gamma_eau, gamma_bois, Nx22, Ny22)
+                Ny13 = (j-centre_y)/coeff
+                Coefficient = Coeff_Frontiere(gamma_eau, gamma_bois, Nx13, Ny13)
             else:
                 if Type!=0:
                     Coefficient = Dict_Coeff[Type]
@@ -720,7 +720,7 @@ def Plots_Results(MapSol,MapSolSB,MapSol_TFSF,Display_Map,Interpolation="none"):
     Diff = abs(MapSol) - abs(MapSolSB)
 
     Diff = -((np.real(MapSol)) -(np.real(MapSolSB)))
-    #Diff = Diff[(S_x - 15):(S_x + 15), (S_y - 15):(S_y + 15)]
+    #Diff = Diff[(S_x - 18):(S_x + 18), (S_y - 18):(S_y + 18)]
     Diff = Diff + 2 * abs(np.min(Diff))
     Diff = np.log(Diff)
 
