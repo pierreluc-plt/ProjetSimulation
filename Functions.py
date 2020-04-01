@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 import time
 import scipy.sparse.csc, scipy.sparse.linalg
@@ -731,7 +732,7 @@ def Plots_Results(MapSol,MapSolSB,MapSol_TFSF,Display_Map,Interpolation="none"):
     plt.show()
 
 
-def Surface_equivalente(Nx_Bois,Ny_Bois,forme,coeff,P_incident,P_scattered,V_incident,Surface):
+def Surface_equivalente(S_x,S_y,Nx,Lx,Nx_Bois,Ny_Bois,forme,coeff,Source_Map,SF_only,Surface):
     """
     P_incident: Pression initiale/ incident sur le bateau 
         (En réalité la puissance sonore donné par Aire * Pression * Vitesse.
@@ -743,14 +744,25 @@ def Surface_equivalente(Nx_Bois,Ny_Bois,forme,coeff,P_incident,P_scattered,V_inc
     Surface: Surface/Périmètre étant exposé au P_incident   
     """
     
+    rayon = 1*Nx/Lx #1m le rayon en nombre de point
     
+    P_incident = 0
+    for indx in range(S_x-math.floor(rayon),S_x+math.floor(rayon)):
+        y_inf = math.ceil(-np.sqrt(rayon**2-(indx-S_x)**2)+S_y)
+        y_sup = math.floor(np.sqrt(rayon**2-(indx-S_x)**2)+S_y)
+        for indy in range(y_inf,y_sup):
+            P_incident += np.real(Source_Map[indx,indy])
+    
+    V_incident = np.pi*rayon**2 #EN nombre de point. En m^2 on change le 2.5 pour 1 ***Si Lx=40 et Nx=100***
+    
+    P_scattered = np.real(np.nansum(SF_only))
     
     if forme == 'triangle':
         aire_nez = Nx_Bois**2/(2*np.tan(coeff/2))
     elif forme == 'cercle':
         angle = 2*np.arcsin(Nx_Bois/(2*coeff))
         aire_nez = 0.5*coeff**2*(angle-np.sin(angle))
-        V_scattered = Nx_Bois*Ny_Bois + aire_nez
+    V_scattered = Nx_Bois*Ny_Bois + aire_nez #En nombre de point. En m^2 *(0.4**2) ***Si Lx=40 et Nx=100
     
     SER = Surface*(P_scattered/V_scattered)/(P_incident/V_incident)
     

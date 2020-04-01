@@ -1,5 +1,6 @@
 ## Importationsdes fonctions
 import numpy as np
+import math
 #from IPython.display import Image
 import matplotlib.pyplot as plt
 #import scipy.sparse.csc, scipy.sparse.linalg
@@ -160,9 +161,9 @@ if __name__ == "__main__":
     # Plots_Results(MapSol, MapSolSB, MapSol_TFSF, Display_Map, Interpolation="none")
     
 
-    #Surface = surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
+    Surface = surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
     
-    #SER = Surface_equivalente(Nx_Bois,Ny_Bois,forme,coeff,P_incident,P_scattered,V_incident,Surface)
+    SER = Surface_equivalente(S_x,S_y,Nx,Lx,Nx_Bois,Ny_Bois,forme,coeff,Source_Map,SF_only,Surface)
 
 
 
