@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 #from Functions import Bois,PML,Source,Coeff_Frontiere,Coeff_PML,p,Source_Cylindrique,Construction_Map,Construction_A,\
     #Resolution, Plots_Results
 
-from Functions import Source_Cylindrique,Construction_Map,Construction_A,Resolution,Plots_Results,surface_directe,Surface_equivalente,Construction_alpha_Map
+from Functions import Source_Cylindrique,Source_Lineaire,Source_Ponctuelle,Construction_Map,Construction_A,Resolution,Plots_Results,surface_directe,Surface_equivalente,Construction_alpha_Map
 
 
 # Fonction dépendant de Nx
@@ -58,7 +58,7 @@ D_y = 25
 # Fréquence d'oscillation de la source
     # Mandat demande entre 100 Hz et 10 kHz
 
-omega = 5e3
+omega = 2000
 
 
 # Intensité de la source (arbitraire)
@@ -86,7 +86,9 @@ v_bois = np.sqrt(B_bois/rho_bois)
 
 # Paramètres calculés
 k2_eau = rho_eau * (omega ** 2 / B_eau + 2j * omega * alpha_eau)
+k0_eau = rho_eau * (omega ** 2 / B_eau)
 k2_bois = rho_bois * (omega ** 2 / B_bois + 2j * omega * alpha_bois)
+n_eau = 1.33
 
 gamma_eau = rho_eau * (alpha_eau * B_eau + 1j * omega)
 gamma_bois = rho_bois * (alpha_bois * B_bois + 1j * omega)
@@ -102,8 +104,23 @@ coeff = np.pi/4
 # Pour faire le code à 9 points ou pas
 Neuf_points = True
 
-# Décider si on utilise un source cylindrique
-SourceCylindrique=True
+# Décider type de source
+Source = 'Ponctuelle' # Lineaire ou Cylindrique[Default]
+theta = -5 # Angle en degrées
+
+if Source=='Lineaire':
+    SourceLineaire=True
+    SourceCylindrique=False
+    SourcePonctuelle=False
+elif Source=='Ponctuelle':
+    SourceLineaire=False
+    SourceCylindrique=False
+    SourcePonctuelle=True
+else:
+    SourceCylindrique=True
+    SourceLineaire=False
+    SourcePonctuelle=False
+    
 Source_Map=np.ones([Nx,Ny])
 # Main:
 
@@ -115,7 +132,13 @@ if __name__ == "__main__":
 
 
     if SourceCylindrique==True:
-        Source_Map=Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False)
+        Source_Map=Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=True)
+        
+    if SourceLineaire==True:
+        Source_Map=Source_Lineaire(Nx,Ny,S_x,S_y,theta,dx,k0_eau,n_eau,plot=True)
+        
+    if SourcePonctuelle==True:
+        Source_Map=Source_Ponctuelle(Nx,Ny,S_x,S_y,theta,dx,plot=True)
 
 
     Map,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,\
@@ -134,7 +157,7 @@ if __name__ == "__main__":
 
 
 
-    A_sp,b_TFSF= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,
+    A_sp,b_TFSF= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,SourceLineaire,SourcePonctuelle,
                               Map,Source_Map ,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois, alpha_Map,omega,B_eau, PML_mode=PML_mode)
 
 

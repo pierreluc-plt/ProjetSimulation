@@ -549,7 +549,7 @@ def Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False):
             fig, ax = plt.subplots(1, 1, figsize=(11, 8))
             cmap = plt.cm.get_cmap('jet', 22)
 
-            ax.imshow(np.transpose(abs(Source_Map)), cmap=cmap)
+            ax.imshow(np.transpose(np.real(Source_Map)), cmap=cmap)
             ax.set_title("La source cylindrique", fontsize=15)
             ax.set_xlabel("x", fontsize=11)
             ax.set_ylabel("y", fontsize=11)
@@ -557,7 +557,54 @@ def Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False):
         return Source_Map
 
 
-def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,Map,\
+def Source_Lineaire(Nx,Ny,S_x,S_y,theta,dx,k2_eau,n_eau,plot=False):
+        Source_Map = np.zeros([Nx, Ny], dtype=np.complex)
+        h = dx
+        theta = np.deg2rad(90+theta)
+        ## Pourrait probablement être intégré dans la construction de A...
+        for i in range(Nx):
+            for j in range(Ny):
+                Source_Map[i, j] = np.exp(-1j*k2_eau*n_eau*((i)*h*np.sin(theta) + (j)*h*np.cos(theta)))
+
+        if plot==True:
+            fig, ax = plt.subplots(1, 1, figsize=(11, 8))
+            cmap = plt.cm.get_cmap('jet', 22)
+
+            ax.imshow(np.transpose(np.real(Source_Map)), cmap=cmap)
+            ax.set_title("La source linéaire", fontsize=15)
+            ax.set_xlabel("x", fontsize=11)
+            ax.set_ylabel("y", fontsize=11)
+            plt.show()
+        return Source_Map
+
+
+def Source_Ponctuelle(Nx,Ny,S_x,S_y,theta,dx,plot=False):
+    """
+    Source ponctuelle implémenter avec une définition du Delta de Dirac utilisé dans Zangwill
+    Théoriquement dans la limite où m -> inf, mais ça cause un problème dans la définition de la 
+    source en TF/SF. m est choisi pour être assez grand relativement et permettre la simulation.
+    """
+        Source_Map = np.zeros([Nx, Ny], dtype=np.complex)
+        h = dx
+        m = 10
+        ## Pourrait probablement être intégré dans la construction de A...
+        for i in range(Nx):
+            for j in range(Ny):
+                Source_Map[i, j] = m/np.sqrt(np.pi)*np.exp(-m**2*(((i-S_x)*dx)**2+((j-S_y)*dx)**2))
+
+        if plot==True:
+            fig, ax = plt.subplots(1, 1, figsize=(11, 8))
+            cmap = plt.cm.get_cmap('jet', 22)
+
+            ax.imshow(np.transpose(np.real(Source_Map)), cmap=cmap)
+            ax.set_title("La source ponctuelle", fontsize=15)
+            ax.set_xlabel("x", fontsize=11)
+            ax.set_ylabel("y", fontsize=11)
+            plt.show()
+        return Source_Map
+
+
+def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,Source_Lineaire,Source_Ponctuelle,Map,\
                    Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois,  alpha_Map, omega , B_eau,PML_mode=1,):
     h=dx
     # **********************Construction de la matrice A************************
@@ -668,7 +715,14 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
             if SourceCylindrique==True:
                 b[L] = Source_Map[i, j] * h ** 2 * rho_eau * p_source
             Q[L, L] = Q_map[i, j]
-
+            
+            if Source_Lineaire==True:
+                b[L] = Source_Map[i, j] * h ** 2 * rho_eau * p_source
+            Q[L, L] = Q_map[i, j]
+            
+            if Source_Ponctuelle==True:
+                b[L] = Source_Map[i, j] * h ** 2 * rho_eau * p_source
+            Q[L, L] = Q_map[i, j]
 
     A_sp = scipy.sparse.csc_matrix(A)
     Q_sp = scipy.sparse.csc_matrix(Q)
