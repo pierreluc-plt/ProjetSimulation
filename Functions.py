@@ -732,7 +732,7 @@ def Plots_Results(MapSol,MapSolSB,MapSol_TFSF,Display_Map,Interpolation="none"):
     plt.show()
 
 
-def Surface_equivalente(S_x,S_y,Nx,Lx,Nx_Bois,Ny_Bois,forme,coeff,Source_Map,SF_only,Surface):
+def Surface_equivalente(S_x,S_y,p_source,Nx,Lx,Nx_Bois,Ny_Bois,forme,coeff,Source_Map,SF_only,Surface):
     """
     P_incident: Pression initiale/ incident sur le bateau 
         (En réalité la puissance sonore donné par Aire * Pression * Vitesse.
@@ -751,11 +751,11 @@ def Surface_equivalente(S_x,S_y,Nx,Lx,Nx_Bois,Ny_Bois,forme,coeff,Source_Map,SF_
         y_inf = math.ceil(-np.sqrt(rayon**2-(indx-S_x)**2)+S_y)
         y_sup = math.floor(np.sqrt(rayon**2-(indx-S_x)**2)+S_y)
         for indy in range(y_inf,y_sup):
-            P_incident += np.real(Source_Map[indx,indy])
+            P_incident += np.abs(np.real(Source_Map[indx,indy])*p_source)
     
     V_incident = np.pi*rayon**2 #EN nombre de point. En m^2 on change le 2.5 pour 1 ***Si Lx=40 et Nx=100***
     
-    P_scattered = np.real(np.nansum(SF_only))
+    P_scattered = np.nansum(np.abs(np.real(SF_only)))
     
     if forme == 'triangle':
         aire_nez = Nx_Bois**2/(2*np.tan(coeff/2))
