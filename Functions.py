@@ -436,7 +436,7 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
 
 
         Coeff = [0,-Beta_x/2/h/(Gamma_x**2)+1/(h**2)/(Gamma_x**2) ,0,-Beta_y/2/h/(Gamma_y**2)+1/(h**2)/(Gamma_y**2)\
-            ,-2/((Gamma_x*h)**2)-2/((Gamma_x*h)**2)+k**2,Beta_x/2/h/(Gamma_x**2)+1/(h**2)/(Gamma_x**2),0,Beta_y/2/h/(Gamma_y**2)+1/(h**2)/(Gamma_y**2),0]
+            ,-2/((Gamma_y*h)**2)-2/((Gamma_x*h)**2)+k**2,Beta_x/2/h/(Gamma_x**2)+1/(h**2)/(Gamma_x**2),0,Beta_y/2/h/(Gamma_y**2)+1/(h**2)/(Gamma_y**2),0]
     return Coeff
 
 # Coefficients pour les PML

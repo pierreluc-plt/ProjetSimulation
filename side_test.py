@@ -36,7 +36,7 @@ Ly = Lx
 dy = dx
 h=dx
 # Épaisseur (en points de la couche de PML)
-N_PML = 4
+N_PML = 10
 
 # Emplacement du bois
 centre_bois_x = 65
@@ -62,7 +62,7 @@ omega = 2000
 
 
 # Intensité de la source (arbitraire)
-p_source = -1e12
+p_source = 1e12
 
 # Eau
 rho_eau = 998.3
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
 
     Map,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,\
-                                      plot=True,PML_mode=PML_mode, Bateau=False, Boisnez_bool=False)
+                                      plot=True,PML_mode=PML_mode, Bateau=True, Boisnez_bool=True)
     alpha_Map=Construction_alpha_Map(Nx,Ny,alpha_eau, alpha_PML,N_PML)
     #Temporaire
     SF_radius=10
@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
 
     A_sp,b_TFSF= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,v_eau,p_source,SourceCylindrique,SourceLineaire,SourcePonctuelle,
-                              Map,Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois, alpha_Map,omega,B_eau, PML_mode=PML_mode)
+                              Map,N_PML,Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois, alpha_Map,omega,B_eau, PML_mode=PML_mode)
 
 
     MapSol_TFSF,P_detecteur=Resolution(A_sp, b_TFSF,Nx,Ny,D_x,D_y)

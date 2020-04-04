@@ -291,12 +291,12 @@ def Coeff_Frontiere(gamma1, gamma2, nx, ny):
 
 
 # Coefficients pour les PML
-def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau):
+def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau,N_PML):
     k = np.sqrt(k2_eau) # p-e seulement la partie réelle de k2eau?
-    beta = v_eau
+    beta = 1
 
-    x = j * h 
-    y = i * h   # Pour éviter les divisions par 0 ?
+    x = i * h 
+    y = j * h   # Pour éviter les divisions par 0 ?
 
     if np.logical_or(np.logical_or(i==0,i==Ny-1),np.logical_or(j==0,j==Nx-1)):
 
@@ -323,8 +323,9 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau):
             Coeff = [0,0,0,0,1,0,0,0,0]
 
         if Type == 21:
-            Coeff = [0,0,0,0,1,0,0,0,0]
-
+            Coeff = [0,0,0,0,1,0,0,0,0]    
+            
+            
     else:
         if Type == 14:
             x0 = 0
@@ -333,6 +334,8 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau):
             Beta_y = 1j *beta *(y0-y) / (np.abs(y0 - y)**2 * (k * np.abs(y0 - y) + 1j*beta))
             Gamma_x = 1 + 1j / k / (np.abs(x0 - x)) *beta
             Gamma_y = 1 + 1j / k / (np.abs(y0 - y)) *beta
+            Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                     ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
         if Type == 15:
             y0 = h * (Ny)  # Ny ou Ny-1 ???
@@ -340,6 +343,11 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau):
             Beta_y = 1j *beta *(y0-y) / (np.abs(y0 - y)**2 * (k * np.abs(y0 - y) + 1j*beta))
             Gamma_x = 1
             Gamma_y = 1 + 1j / k / (np.abs(y0 - y)) *beta
+            if j == Nx-N_PML:
+                Coeff = [0,0,-Gamma_y,4*Gamma_y,(-3*Gamma_y-3),0,0,4,-1]
+            else:    
+                Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                         ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
 
         if Type == 16:
@@ -349,6 +357,8 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau):
             Beta_y = 1j *beta *(y0-y) / (np.abs(y0 - y)**2 * (k * np.abs(y0 - y) + 1j*beta))
             Gamma_x = 1 + 1j / k / (np.abs(x0 - x)) *beta
             Gamma_y = 1 + 1j / k / (np.abs(y0 - y)) *beta
+            Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                     ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
         if Type == 17:
             x0 = h * (Nx)  # Nx ou Nx-1 ???
@@ -356,6 +366,11 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau):
             Beta_y = 0
             Gamma_x = 1 + 1j / k / (np.abs(x0 - x)) *beta
             Gamma_y = 1
+            if i == Ny-N_PML:
+                Coeff = [-Gamma_x,4*Gamma_x,0,0,(-3*Gamma_x-3),4,-1,0,0]
+            else:    
+                Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                         ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
 
         if Type == 18:
@@ -365,6 +380,8 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau):
             Beta_y = 1j *beta *(y0-y) / (np.abs(y0 - y)**2 * (k * np.abs(y0 - y) + 1j*beta))
             Gamma_x = 1 + 1j / k / (np.abs(x0 - x)) *beta
             Gamma_y = 1 + 1j / k / (np.abs(y0 - y)) *beta
+            Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                     ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
         if Type == 19:
             y0 = 0
@@ -372,6 +389,12 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau):
             Beta_y = 1j *beta *(y0-y) / (np.abs(y0 - y)**2 * (k * np.abs(y0 - y) + 1j*beta))
             Gamma_x = 1
             Gamma_y = 1 + 1j / k / (np.abs(y0 - y)) *beta
+            
+            if j == N_PML-1:
+                Coeff = [0,0,-1,4,(-3*Gamma_y-3),0,0,4*Gamma_y,-Gamma_y]
+            else:    
+                Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                         ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
 
         if Type == 20:
@@ -381,21 +404,26 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau):
             Beta_y = 1j *beta *(y0-y) / (np.abs(y0 - y)**2 * (k * np.abs(y0 - y) + 1j*beta))
             Gamma_x = 1 + 1j / k / (np.abs(x0 - x)) *beta
             Gamma_y = 1 + 1j / k / (np.abs(y0 - y)) *beta
+            Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                     ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
         if Type == 21:
             x0 = 0
-
             Beta_x = 1j *beta *(x0-x) / (np.abs(x0 - x)**2 * (k * np.abs(x0 - x) + 1j*beta))
             Beta_y = 0
             Gamma_x = 1 + 1j / k / (np.abs(x0 - x)) *beta
             Gamma_y = 1 
+            if i == N_PML-1:
+                Coeff = [-1,4,0,0,(-3*Gamma_x-3),4*Gamma_x,-Gamma_x,0,0]
+            else:    
+                Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                         ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
 
-        Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
-            ,-2/((Gamma_x)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
+
+#        Coeff = [0,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+#            ,-2/((Gamma_x)**2)-2/((Gamma_y)**2)+k**2*h**2,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
         
-#        Coeff = [0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) \
-#            ,-2/((Gamma_x)**2)-2/((Gamma_x)**2)+k**2*h**2,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0]
         
     return Coeff
 
@@ -561,7 +589,7 @@ def Source_Ponctuelle(Nx,Ny,S_x,S_y,theta,dx,plot=False):
 
 
 def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,v_eau,p_source,SourceCylindrique,Source_Lineaire,Source_Ponctuelle,Map,\
-                   Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois,  alpha_Map, omega , B_eau,PML_mode=1,):
+                   N_PML,Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois,  alpha_Map, omega , B_eau,PML_mode=1,):
     h=dx
     # **********************Construction de la matrice A************************
 
@@ -631,17 +659,22 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
         PML_Range=21
 
     Source_mask = np.ones([Ny, Nx], dtype=np.complex) * np.finfo(float).eps
-    Source_mask[1:-1,1:-1] = 1
+    Source_mask[1:-1,1:-1] = 0
+    Source_mask[N_PML+2:Nx-N_PML-2,N_PML+2:Nx-N_PML-2] = 1
+#    Source_mask[N_PML-1,N_PML-1:Nx-N_PML] = 0
+#    Source_mask[N_PML-1:Nx-N_PML,N_PML-1] = 0
+#    Source_mask[Nx-N_PML,N_PML-1:Nx-N_PML] = 0
+#    Source_mask[N_PML-1:Nx-N_PML+1,Nx-N_PML] = 0
 
-    for i in range(Ny):
-        for j in range(Nx):
+    for i in range(Nx):
+        for j in range(Ny):
             L = p(i, j, Nx)
 
             Type = int(Map[i, j])
 
             if np.logical_and(Type >= 14, Type <= PML_Range):
                 if PML_mode==1:
-                    Coefficient = Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau)
+                    Coefficient = Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau,N_PML)
                 if PML_mode==2:
                     alpha=alpha_Map[i,j]
                     Coefficient =Coeff_PML2(Type, h, Nx, Ny, omega,B_eau, alpha,rho_eau)
