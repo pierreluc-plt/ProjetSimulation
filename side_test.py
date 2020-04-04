@@ -11,14 +11,14 @@ import matplotlib.pyplot as plt
 #from Functions import Bois,PML,Source,Coeff_Frontiere,Coeff_PML,p,Source_Cylindrique,Construction_Map,Construction_A,\
     #Resolution, Plots_Results
 
-from Functions import Source_Cylindrique,Source_Lineaire,Source_Ponctuelle,Construction_Map,Construction_A,Resolution,Plots_Results,surface_directe,Surface_equivalente,Construction_alpha_Map
+from Functions2 import Source_Cylindrique,Source_Lineaire,Source_Ponctuelle,Construction_Map,Construction_A,Resolution,Plots_Results,surface_directe,Surface_equivalente,Construction_alpha_Map
 
 
 # Fonction dépendant de Nx
 
 # Nombre de points en x
 
-Nx = 100
+Nx = 101
 
 
 # Paramètres de la simulations
@@ -29,14 +29,14 @@ Lx = 40
 dx = (Lx) / (Nx - 1)
 
 # Nombre de points en y
-Ny = Nx
+Ny = 101
 # Longueur en x (m)
 Ly = Lx
 # Espace entre chaque noeud
 dy = dx
 h=dx
 # Épaisseur (en points de la couche de PML)
-N_PML = 10
+N_PML = 4
 
 # Emplacement du bois
 centre_bois_x = 65
@@ -50,8 +50,8 @@ S_x = 50
 S_y = 50
 
 # Emplacement du détecteur
-D_x = 23
-D_y = 25
+D_x = 99
+D_y = 99
 
 ## Paramètres des milieux:
 
@@ -121,7 +121,7 @@ else:
     SourceLineaire=False
     SourcePonctuelle=False
     
-Source_Map=np.ones([Nx,Ny])
+Source_Map=np.ones([Ny,Nx])
 # Main:
 
 PML_mode=1  # Mode 2: PML avec le alpha map, Mode 1= PML classique
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     alpha_Map=Construction_alpha_Map(Nx,Ny,alpha_eau, alpha_PML,N_PML)
     #Temporaire
     SF_radius=10
-    Q_map=np.ones([Nx,Ny])
+    Q_map=np.ones([Ny,Nx])
     #for i in range(Nx):
     #    for j in range(Ny):
     #        if ((i-D_x)**2+(j-D_y)**2)<SF_radius**2:
@@ -157,8 +157,8 @@ if __name__ == "__main__":
 
 
 
-    A_sp,b_TFSF= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,SourceLineaire,SourcePonctuelle,
-                              Map,Source_Map ,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois, alpha_Map,omega,B_eau, PML_mode=PML_mode)
+    A_sp,b_TFSF= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,v_eau,p_source,SourceCylindrique,SourceLineaire,SourcePonctuelle,
+                              Map,Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois, alpha_Map,omega,B_eau, PML_mode=PML_mode)
 
 
     MapSol_TFSF,P_detecteur=Resolution(A_sp, b_TFSF,Nx,Ny,D_x,D_y)
@@ -167,7 +167,7 @@ if __name__ == "__main__":
 
     fig,ax=plt.subplots(2,2,figsize=(16,8))
     ax[1][1].set_title("Scattered field seulement")
-    SF_only=(MapSol_TFSF*Q_map)
+    SF_only=(MapSol_TFSF)
     SF_only[SF_only==0]=np.nan
     ax[1][1].imshow(np.transpose((np.real(SF_only[N_PML:-N_PML,N_PML:-N_PML]))), alpha=1.0, cmap="jet")
     ax[1][0].set_title("Solution")
