@@ -30,7 +30,7 @@ Lx = 40
 dx = (Lx) / (Nx - 1)
 
 # Nombre de points en y
-Ny = 101
+Ny = Nx
 # Longueur en x (m)
 Ly = Lx
 # Espace entre chaque noeud
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     Surface = surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
 
 
-    omega_array=np.linspace(100,5001,10)
+    omega_array=np.linspace(100,5001,1)
 
     for omega in omega_array:
         # Paramètres calculés
@@ -190,8 +190,9 @@ if __name__ == "__main__":
 
 
     # Plots_Results(MapSol, MapSolSB, MapSol_TFSF, Display_Map, Interpolation="none")
-    #     plt.figure()
-    #     plt.imshow(np.transpose((np.real(SF_only[N_PML:-N_PML,N_PML:-N_PML]))), alpha=1.0, cmap="jet",interpolation="gaussian")
+        plt.figure()
+        plt.imshow(np.transpose((np.real(SF_only[N_PML:-N_PML,N_PML:-N_PML]))), alpha=1.0, cmap="jet",interpolation="gaussian")
+        plt.show()
         SERv2=SER2(S_x, S_y, MapSol_TFSF, Source_Map,p_source, centre_bois_x, centre_bois_y, 5, dx)
         SER_Array_v2.append(SERv2)
 
@@ -211,5 +212,27 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
 
-### Test
+### Test Gif
+
+
+
+    # # fig, ax = plt.subplots(figsize=(12, 12))
+    # Min = 0
+    # Max = 0
+    # for i in range(len(SF_only_Array)):
+    #     S = np.real(SF_only_Array[i])
+    #
+    #     if Min > np.nanmin(S, ):
+    #         Min = np.nanmin(S)
+    #     if Max < np.nanmax(S):
+    #         Max = np.nanmax(S)
+
+    # def update(i):
+    #     SF_only = SF_only_Array[i]
+    #     ax.imshow(np.transpose((np.real(SF_only[N_PML:-N_PML,N_PML:-N_PML]))),interpolation="gaussian",vmin=Min,vmax=Max, cmap="jet")
+    #     #ax.set_title("Omega: {}".format(omega_array[i]), fontsize=20)
+    #     ax.set_axis_off()
+    # anim = FuncAnimation(fig, update, frames=np.arange(0, len(SF_only_Array)), interval=100)
+    # anim.save('colour_rotation.gif', dpi=40, writer='imagemagick')
+
 

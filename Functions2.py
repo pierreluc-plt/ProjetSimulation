@@ -3,7 +3,7 @@ import math
 import matplotlib.pyplot as plt
 import time
 import scipy.sparse.csc, scipy.sparse.linalg
-
+import scipy.sparse.csr
 # Importer ce qui est nécessaire pour les fonctions
 
 def p(i, j,Nx):
@@ -716,9 +716,9 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
                 b[L] = Source_Map[i, j] * Source_mask[i,j] * h ** 2 * rho_eau * p_source
             Q[L, L] = Q_map[i, j]
 
-    A_sp = scipy.sparse.csc_matrix(A)
+    A_sp =scipy.sparse.csc_matrix(A) #scipy.sparse.csc_matrix(A)
     if TF_SF==True:
-        Q_sp = scipy.sparse.csc_matrix(Q)
+        Q_sp =scipy.sparse.csc_matrix(Q) #scipy.sparse.csc_matrix(Q)
         b_TFSF = (Q_sp.dot(A_sp) - A_sp.dot(Q_sp)).dot(b)
     else:
         b_TFSF=b
