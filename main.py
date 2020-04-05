@@ -105,15 +105,8 @@ coeff = np.pi/4
 Neuf_points = True
 
 # Décider type de source
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 Source = "Cylindrique" # Lineaire ou Cylindrique[Default]
-=======
-Source = '' # Lineaire ou Cylindrique[Default]
->>>>>>> c0f392383899f543ed167c7933eb9aeeb43654ea
-=======
-Source = 'Ponctuelle' # Lineaire ou Cylindrique[Default]
->>>>>>> parent of 4cd9266... no message
 theta = -5 # Angle en degrées
 
 if Source=='Lineaire':
@@ -150,15 +143,8 @@ if __name__ == "__main__":
 
 
     Map,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,\
-<<<<<<< HEAD
-<<<<<<< HEAD
                                       plot=False,PML_mode=PML_mode, Bateau=False, Boisnez_bool=True)
-=======
-                                      plot=True,PML_mode=PML_mode, Bateau=False, Boisnez_bool=False)
->>>>>>> c0f392383899f543ed167c7933eb9aeeb43654ea
-=======
-                                      plot=False,PML_mode=PML_mode, Bateau=True, Boisnez_bool=True)
->>>>>>> parent of 4cd9266... no message
+
     alpha_Map=Construction_alpha_Map(Nx,Ny,alpha_eau, alpha_PML,N_PML)
     #Temporaire
     SF_radius=10

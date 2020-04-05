@@ -584,7 +584,7 @@ def Source_Ponctuelle(Nx,Ny,S_x,S_y,theta,dx,plot=False):
     Théoriquement dans la limite où m -> inf, mais ça cause un problème dans la définition de la 
     source en TF/SF. m est choisi pour être assez grand relativement et permettre la simulation.
     """
-<<<<<<< HEAD
+
     Source_Map = np.zeros([Nx, Ny], dtype=np.complex)
     h = dx
     m = 10
@@ -592,14 +592,12 @@ def Source_Ponctuelle(Nx,Ny,S_x,S_y,theta,dx,plot=False):
     for i in range(Nx):
         for j in range(Ny):
             Source_Map[i, j] = m/np.sqrt(np.pi)*np.exp(-m**2*(((i-S_x)*dx)**2+((j-S_y)*dx)**2))
-=======
+
         """
         Source ponctuelle implémenter avec une définition du Delta de Dirac utilisé dans Zangwill
         Théoriquement dans la limite où m -> inf, mais ça cause un problème dans la définition de la 
         source en TF/SF. m est choisi pour être assez grand relativement et permettre la simulation.
         """
-=======
->>>>>>> parent of 4cd9266... no message
         Source_Map = np.zeros([Nx, Ny], dtype=np.complex)
         h = dx
         m = 10
@@ -607,10 +605,7 @@ def Source_Ponctuelle(Nx,Ny,S_x,S_y,theta,dx,plot=False):
         for i in range(Nx):
             for j in range(Ny):
                 Source_Map[i, j] = m/np.sqrt(np.pi)*np.exp(-m**2*(((i-S_x)*dx)**2+((j-S_y)*dx)**2))
-<<<<<<< HEAD
->>>>>>> c0f392383899f543ed167c7933eb9aeeb43654ea
-=======
->>>>>>> parent of 4cd9266... no message
+
 
         if plot==True:
             fig, ax = plt.subplots(1, 1, figsize=(11, 8))

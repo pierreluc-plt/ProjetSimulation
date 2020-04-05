@@ -589,7 +589,7 @@ def Source_Ponctuelle(Nx,Ny,S_x,S_y,theta,dx,plot=False):
 
 
 def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,v_eau,p_source,SourceCylindrique,Source_Lineaire,Source_Ponctuelle,Map,\
-                   N_PML,Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois,  alpha_Map, omega , B_eau,PML_mode=1,):
+                   N_PML,Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois,  alpha_Map, omega , B_eau,PML_mode=1,TF_SF=True):
     h=dx
     # **********************Construction de la matrice A************************
 
@@ -717,9 +717,11 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
             Q[L, L] = Q_map[i, j]
 
     A_sp = scipy.sparse.csc_matrix(A)
-    Q_sp = scipy.sparse.csc_matrix(Q)
-    b_TFSF = (Q_sp.dot(A_sp) - A_sp.dot(Q_sp)).dot(b)
-#    b_TFSF = b
+    if TF_SF==True:
+        Q_sp = scipy.sparse.csc_matrix(Q)
+        b_TFSF = (Q_sp.dot(A_sp) - A_sp.dot(Q_sp)).dot(b)
+    else:
+        b_TFSF=b
 
     return A_sp,b_TFSF
 
@@ -733,17 +735,15 @@ def Resolution(A_sp, b_TFSF,Nx,Ny,D_x,D_y):
     sol_TFSF = scipy.sparse.linalg.spsolve(A_sp, b_TFSF)
     
     t = time.perf_counter() - t0
-    print("Temps pour inverser les deux matrices: {:.3f} s.".format(t))
+    print("Temps pour inverser la  matrice: {:.3f} s.".format(t))
     # Création map de solution
 
     for i in range(Nx):
         for j in range(Ny):
             MapSol_TFSF[i, j] = sol_TFSF[int(p(i, j,Nx))]
     
-    #Intensite au detecteur
-    P_detecteur = MapSol_TFSF[D_x, D_y]
 
-    return MapSol_TFSF, P_detecteur
+    return MapSol_TFSF
 
 
 def Plots_Results(MapSol,MapSolSB,MapSol_TFSF,Display_Map,Interpolation="none"):
@@ -812,4 +812,31 @@ def Surface_equivalente(S_x,S_y,p_source,Nx,Lx,Nx_Bois,Ny_Bois,forme,coeff,Sourc
     
     SER = Surface*(P_scattered/V_scattered)/(P_incident/V_incident)
     
-    return SER    
+    return SER
+
+def SER2(Sx,Sy,SF_only,Source_Map,p_source,centre_bois_x,centre_bois_y, R_integration,dx):
+    # R_integration est en mètre
+    P_incidente=0
+    P_recu=0
+    for i in range(Source_Map.shape[0]):
+        for j in range(Source_Map.shape[1]):
+            if np.sqrt((i-Sx)**2+(j-Sy)**2)<R_integration:
+                P_incidente=abs(np.real(p_source*Source_Map[i,j]))+P_incidente
+                P_recu=abs(np.real(SF_only[i,j]))+P_recu
+
+    Distance_bateau_bois=np.sqrt((Sx-centre_bois_x)**2+(Sy-centre_bois_y)**2)*dx
+    SER=P_recu/P_incidente*Distance_bateau_bois**2
+    return SER
+
+def Select_Source(SourceLineaire, SourceCylindrique, SourcePonctuelle, Nx, Ny, S_x, S_y, dx, k2_eau, k0_eau, n_eau,\
+                  theta, Plot_Source):
+
+    if SourceCylindrique == True:
+        Source_Map = Source_Cylindrique(Nx, Ny, S_x, S_y, dx, k2_eau, plot=Plot_Source)
+
+    if SourceLineaire == True:
+        Source_Map = Source_Lineaire(Nx, Ny, S_x, S_y, theta, dx, k0_eau, n_eau, plot=Plot_Source)
+
+    if SourcePonctuelle == True:
+        Source_Map = Source_Ponctuelle(Nx, Ny, S_x, S_y, theta, dx, plot=Plot_Source)
+    return Source_Map
