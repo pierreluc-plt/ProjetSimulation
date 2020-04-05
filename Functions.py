@@ -296,8 +296,8 @@ def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
 
     x = i * h + h / 2
     y = j * h + h / 2  # Pour éviter les divisions par 0 ?
-    Ny=Ny-1
-    Nx=Nx-1
+    Ny=Ny
+    Nx=Nx
 
     if np.logical_or(np.logical_or(i==0,i==Nx-1),np.logical_or(j==0,j==Ny-1)):
 
@@ -500,10 +500,11 @@ def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,co
 
     Display_Map = np.copy(Map)
     # Les deux cas de PML
-    Display_Map[np.logical_and(Map > 10, Map <= 22)] = 0
+    Display_Map[np.logical_and(Map > 13, Map <= 22)] = 0
     Display_Map[Map == 22] = 0
 
-    Display_Map[np.logical_or(np.logical_and(Map >= 2, Map < 14),Map>=11)] = 3
+    # Conditions frontières
+    Display_Map[np.logical_and(Map >= 2, Map < 14)] = 3
     ## La source
     Display_Map[Map == 0] = 5
 
@@ -584,24 +585,24 @@ def Source_Ponctuelle(Nx,Ny,S_x,S_y,theta,dx,plot=False):
     Théoriquement dans la limite où m -> inf, mais ça cause un problème dans la définition de la 
     source en TF/SF. m est choisi pour être assez grand relativement et permettre la simulation.
     """
-        Source_Map = np.zeros([Nx, Ny], dtype=np.complex)
-        h = dx
-        m = 10
-        ## Pourrait probablement être intégré dans la construction de A...
-        for i in range(Nx):
-            for j in range(Ny):
-                Source_Map[i, j] = m/np.sqrt(np.pi)*np.exp(-m**2*(((i-S_x)*dx)**2+((j-S_y)*dx)**2))
+    Source_Map = np.zeros([Nx, Ny], dtype=np.complex)
+    h = dx
+    m = 10
+    ## Pourrait probablement être intégré dans la construction de A...
+    for i in range(Nx):
+        for j in range(Ny):
+            Source_Map[i, j] = m/np.sqrt(np.pi)*np.exp(-m**2*(((i-S_x)*dx)**2+((j-S_y)*dx)**2))
 
-        if plot==True:
-            fig, ax = plt.subplots(1, 1, figsize=(11, 8))
-            cmap = plt.cm.get_cmap('jet', 22)
+    if plot==True:
+        fig, ax = plt.subplots(1, 1, figsize=(11, 8))
+        cmap = plt.cm.get_cmap('jet', 22)
 
-            ax.imshow(np.transpose(np.real(Source_Map)), cmap=cmap)
-            ax.set_title("La source ponctuelle", fontsize=15)
-            ax.set_xlabel("x", fontsize=11)
-            ax.set_ylabel("y", fontsize=11)
-            plt.show()
-        return Source_Map
+        ax.imshow(np.transpose(np.real(Source_Map)), cmap=cmap)
+        ax.set_title("La source ponctuelle", fontsize=15)
+        ax.set_xlabel("x", fontsize=11)
+        ax.set_ylabel("y", fontsize=11)
+        plt.show()
+    return Source_Map
 
 
 def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,Source_Lineaire,Source_Ponctuelle,Map,\
@@ -726,7 +727,7 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
 
     A_sp = scipy.sparse.csc_matrix(A)
     Q_sp = scipy.sparse.csc_matrix(Q)
-    b_TFSF = (Q_sp.dot(A_sp) - A_sp.dot(Q_sp)).dot(b)
+    b_TFSF = b# (Q_sp.dot(A_sp) - A_sp.dot(Q_sp)).dot(b)
 
 
     return A_sp,b_TFSF
