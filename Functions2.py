@@ -9,7 +9,7 @@ import scipy.sparse.csc, scipy.sparse.linalg
 def p(i, j,Nx):
     """Le noeud (i,j) correspond à la ligne L de la matrice A"""
     # J'ai modifié pour tenir compte de la convention de Python:
-    L = i + (j) * Nx
+    L = (i) + (j) * Nx
     return L
 
 
@@ -291,154 +291,140 @@ def Coeff_Frontiere(gamma1, gamma2, nx, ny):
 
 
 # Coefficients pour les PML
-def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau):
+def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau,N_PML):
     k = np.sqrt(k2_eau) # p-e seulement la partie réelle de k2eau?
+    beta = 1
 
-    x = i * h + h / 2
-    y = j * h + h / 2  # Pour éviter les divisions par 0 ?
-    Ny=Ny
-    Nx=Nx
+    x = i * h 
+    y = j * h   # Pour éviter les divisions par 0 ?
 
-    if np.logical_or(np.logical_or(i==0,i==Nx-1),np.logical_or(j==0,j==Ny-1)):
+    if np.logical_or(np.logical_or(i==0,i==Ny-1),np.logical_or(j==0,j==Nx-1)):
 
     #Couche sur les bords extérieurs
         if Type == 14:
-            x0 = 0
-            y0 = h * (Ny-1)  # Ny ou Ny-1 ???
-            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-            Gamma_x = 1 + 1j / k / (abs(x0 - x))
-            Gamma_y = 1 + 1j / k / (abs(y0 - y))
-            Coeff = [0, 0, 1 / Gamma_y ** 2, (-h * Beta_y - 2) / Gamma_y ** 2,
-                     k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) + ((1 - h * Beta_x) / Gamma_x ** 2), \
-                     (h * Beta_x - 2) / Gamma_x ** 2, 1 / Gamma_x ** 2, 0, 0]
+            Coeff = [0,0,0,0,1,0,0,0,0]
+            
         if Type == 15:
-            y0 = h * Ny  # Ny ou Ny-1 ???
-            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-            Gamma_y = 1 + 1j / k / (abs(y0 - y))
-            Coeff = [0, 1, 1 / Gamma_y ** 2, -(2 + h * Beta_y) / Gamma_y ** 2,
-                     k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) - 2, \
-                     1, 0, 0, 0]
+            Coeff = [0,0,0,0,1,0,0,0,0]
 
         if Type == 16:
-            x0 = h * Nx  # Nx ou Nx-1 ???
-            y0 = h * Ny  # Ny ou Ny-1 ???
-            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-            Gamma_x = 1 + 1j / k / (abs(x0 - x))
-            Gamma_y = 1 + 1j / k / (abs(y0 - y))
-            Coeff = [1 / Gamma_x ** 2, -(h * Beta_x + 2) / Gamma_x ** 2, 1 / Gamma_y ** 2, -(h * Beta_y + 2) / Gamma_y ** 2, \
-                     k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) + ((1 + h * Beta_x) / Gamma_x ** 2), 0, 0, 0, 0]
+            Coeff = [0,0,0,0,1,0,0,0,0]
+            
         if Type == 17:
-            x0 = h * Nx  # Nx ou Nx-1 ???
-            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-            Gamma_x = 1 + 1j / k / (abs(x0 - x))
-            Coeff = [1 / Gamma_x ** 2, -(h * Beta_x + 2) / Gamma_x ** 2, 0, 1, \
-                     k ** 2 * h ** 2 - 2 + ((1 + h * Beta_x) / Gamma_x ** 2), 0, 0, 1, 0]
+            Coeff = [0,0,0,0,1,0,0,0,0]
 
         if Type == 18:
-            x0 = h * Nx  # Nx ou Nx-1 ???
-            y0 = 0
-            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-            Gamma_x = 1 + 1j / k / (abs(x0 - x))
-            Gamma_y = 1 + 1j / k / (abs(y0 - y))
-            Coeff = [-1 / Gamma_x ** 2, -(h * Beta_x + 2) / Gamma_x ** 2, 0, 0, \
-                     k ** 2 * h ** 2 + ((1 - h * Beta_y) / Gamma_y ** 2) + ((1 + h * Beta_x) / Gamma_x ** 2), 0, 0,
-                     (h * Beta_y - 2) / Gamma_y ** 2, 1 / Gamma_y ** 2]
+            Coeff = [0,0,0,0,1,0,0,0,0]
+            
         if Type == 19:
-            y0 = 0
-            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-            Gamma_y = 1 + 1j / k / (abs(y0 - y))
-            Coeff = [0, 1, 0, 0, \
-                     k ** 2 * h ** 2 + ((1 + h * Beta_y) / Gamma_y ** 2) - 2, 1, 0, (h * Beta_y - 2) / Gamma_y ** 2,
-                     1 / Gamma_y ** 2]
+            Coeff = [0,0,0,0,1,0,0,0,0]
 
         if Type == 20:
-            x0 = 0
-            y0 = 0
-            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-            Gamma_x = 1 + 1j / k / (abs(x0 - x))
-            Gamma_y = 1 + 1j / k / (abs(y0 - y))
-            Coeff = [0, 0, 0, 0, k ** 2 * h ** 2 + ((1 - h * Beta_y) / Gamma_y ** 2) + ((1 - h * Beta_x) / Gamma_x ** 2), \
-                     (h * Beta_x - 2) / Gamma_x ** 2, 1 / Gamma_x ** 2, (h * Beta_y - 2) / Gamma_y ** 2, 1 / Gamma_y ** 2]
+            Coeff = [0,0,0,0,1,0,0,0,0]
 
         if Type == 21:
-            x0 = 0
-            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-            Gamma_x = 1 + 1j / k / (abs(x0 - x))
-            Coeff = [0, 0, 0, 1, k ** 2 * h ** 2 - 2 + ((1 - h * Beta_x) / Gamma_x ** 2), (h * Beta_x - 2) / Gamma_x ** 2,
-                     1 / Gamma_x ** 2, 1, 0]
-
+            Coeff = [0,0,0,0,1,0,0,0,0]    
+            
+            
     else:
         if Type == 14:
             x0 = 0
             y0 = h * (Ny)  # Ny ou Ny-1 ???
-            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-            Gamma_x = 1 + 1j / k / (abs(x0 - x))
-            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+            Beta_x = 1j *beta *(x0-x) / (np.abs(x0 - x)**2 * (k * np.abs(x0 - x) + 1j*beta))
+            Beta_y = 1j *beta *(y0-y) / (np.abs(y0 - y)**2 * (k * np.abs(y0 - y) + 1j*beta))
+            Gamma_x = 1 + 1j / k / (np.abs(x0 - x)) *beta
+            Gamma_y = 1 + 1j / k / (np.abs(y0 - y)) *beta
+            Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                     ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
         if Type == 15:
-            y0 = h * Ny  # Ny ou Ny-1 ???
+            y0 = h * (Ny)  # Ny ou Ny-1 ???
             Beta_x = 0
-            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Beta_y = 1j *beta *(y0-y) / (np.abs(y0 - y)**2 * (k * np.abs(y0 - y) + 1j*beta))
             Gamma_x = 1
-            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+            Gamma_y = 1 + 1j / k / (np.abs(y0 - y)) *beta
+            if j == Nx-N_PML:
+                Coeff = [0,0,-Gamma_y,4*Gamma_y,(-3*Gamma_y-3),0,0,4,-1]
+            else:    
+                Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                         ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
 
         if Type == 16:
-            x0 = h * Nx  # Nx ou Nx-1 ???
-            y0 = h * Ny  # Ny ou Ny-1 ???
-            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-            Gamma_x = 1 + 1j / k / (abs(x0 - x))
-            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+            x0 = h * (Nx)  # Nx ou Nx-1 ???
+            y0 = h * (Ny)  # Ny ou Ny-1 ???
+            Beta_x = 1j *beta *(x0-x) / (np.abs(x0 - x)**2 * (k * np.abs(x0 - x) + 1j*beta))
+            Beta_y = 1j *beta *(y0-y) / (np.abs(y0 - y)**2 * (k * np.abs(y0 - y) + 1j*beta))
+            Gamma_x = 1 + 1j / k / (np.abs(x0 - x)) *beta
+            Gamma_y = 1 + 1j / k / (np.abs(y0 - y)) *beta
+            Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                     ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
         if Type == 17:
-            x0 = h * Nx  # Nx ou Nx-1 ???
-            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            x0 = h * (Nx)  # Nx ou Nx-1 ???
+            Beta_x = 1j *beta *(x0-x) / (np.abs(x0 - x)**2 * (k * np.abs(x0 - x) + 1j*beta))
             Beta_y = 0
-            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Gamma_x = 1 + 1j / k / (np.abs(x0 - x)) *beta
             Gamma_y = 1
+            if i == Ny-N_PML:
+                Coeff = [-Gamma_x,4*Gamma_x,0,0,(-3*Gamma_x-3),4,-1,0,0]
+            else:    
+                Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                         ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
 
         if Type == 18:
-            x0 = h * Nx  # Nx ou Nx-1 ???
+            x0 = h * (Nx)  # Nx ou Nx-1 ???
             y0 = 0
-            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-            Gamma_x = 1 + 1j / k / (abs(x0 - x))
-            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+            Beta_x = 1j *beta *(x0-x) / (np.abs(x0 - x)**2 * (k * np.abs(x0 - x) + 1j*beta))
+            Beta_y = 1j *beta *(y0-y) / (np.abs(y0 - y)**2 * (k * np.abs(y0 - y) + 1j*beta))
+            Gamma_x = 1 + 1j / k / (np.abs(x0 - x)) *beta
+            Gamma_y = 1 + 1j / k / (np.abs(y0 - y)) *beta
+            Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                     ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
         if Type == 19:
             y0 = 0
             Beta_x = 0
-            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
+            Beta_y = 1j *beta *(y0-y) / (np.abs(y0 - y)**2 * (k * np.abs(y0 - y) + 1j*beta))
             Gamma_x = 1
-            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+            Gamma_y = 1 + 1j / k / (np.abs(y0 - y)) *beta
+            
+            if j == N_PML-1:
+                Coeff = [0,0,-1,4,(-3*Gamma_y-3),0,0,4*Gamma_y,-Gamma_y]
+            else:    
+                Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                         ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
 
         if Type == 20:
             x0 = 0
             y0 = 0
-            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
-            Beta_y = 1j / ((y - y0) * (k * abs(y - y0) + 1j))
-            Gamma_x = 1 + 1j / k / (abs(x0 - x))
-            Gamma_y = 1 + 1j / k / (abs(y0 - y))
+            Beta_x = 1j *beta *(x0-x) / (np.abs(x0 - x)**2 * (k * np.abs(x0 - x) + 1j*beta))
+            Beta_y = 1j *beta *(y0-y) / (np.abs(y0 - y)**2 * (k * np.abs(y0 - y) + 1j*beta))
+            Gamma_x = 1 + 1j / k / (np.abs(x0 - x)) *beta
+            Gamma_y = 1 + 1j / k / (np.abs(y0 - y)) *beta
+            Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                     ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
         if Type == 21:
             x0 = 0
-
-            Beta_x = 1j / ((x - x0) * (k * abs(x - x0) + 1j))
+            Beta_x = 1j *beta *(x0-x) / (np.abs(x0 - x)**2 * (k * np.abs(x0 - x) + 1j*beta))
             Beta_y = 0
-            Gamma_x = 1 + 1j / k / (abs(x0 - x))
+            Gamma_x = 1 + 1j / k / (np.abs(x0 - x)) *beta
             Gamma_y = 1 
+            if i == N_PML-1:
+                Coeff = [-1,4,0,0,(-3*Gamma_x-3),4*Gamma_x,-Gamma_x,0,0]
+            else:    
+                Coeff = [0,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+                         ,-2/((Gamma_y)**2)-2/((Gamma_x)**2)+k**2*h**2,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
 
 
-        Coeff = [0,-Beta_x/2/h/(Gamma_x**2)+1/(h**2)/(Gamma_x**2) ,0,-Beta_y/2/h/(Gamma_y**2)+1/(h**2)/(Gamma_y**2)\
-            ,-2/((Gamma_y*h)**2)-2/((Gamma_x*h)**2)+k**2,Beta_x/2/h/(Gamma_x**2)+1/(h**2)/(Gamma_x**2),0,Beta_y/2/h/(Gamma_y**2)+1/(h**2)/(Gamma_y**2),0]
+
+#        Coeff = [0,-Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2) ,0,-Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2)\
+#            ,-2/((Gamma_x)**2)-2/((Gamma_y)**2)+k**2*h**2,Beta_x/2*h/(Gamma_x**2)+1/(Gamma_x**2),0,Beta_y/2*h/(Gamma_y**2)+1/(Gamma_y**2),0]
+        
+        
     return Coeff
 
 # Coefficients pour les PML
@@ -468,7 +454,7 @@ def Coeff_PML2(Type, h, Nx, Ny,omega,B_eau,alpha,rho_eau):
     return Coeff
 
 def Construction_alpha_Map(Nx,Ny,alpha_eau, alpha_PML,N_PML):
-    grid = np.ones([Nx, Ny])
+    grid = np.ones([Ny, Nx])
     d_alpha = (alpha_PML - alpha_eau) / N_PML
     grid = grid * alpha_eau
     for i in range(N_PML):
@@ -482,7 +468,7 @@ def Construction_alpha_Map(Nx,Ny,alpha_eau, alpha_PML,N_PML):
 
 def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,plot=True, \
                      PML_mode=1,Bateau=True, Boisnez_bool=True):
-    Map = np.ones([Nx, Ny])
+    Map = np.ones([Ny, Nx])
     # Création de la map avec les points
     if Bateau==True:
         Map = Bois(Map, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois)
@@ -500,11 +486,10 @@ def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,co
 
     Display_Map = np.copy(Map)
     # Les deux cas de PML
-    Display_Map[np.logical_and(Map > 13, Map <= 22)] = 0
+    Display_Map[np.logical_and(Map > 10, Map <= 22)] = 0
     Display_Map[Map == 22] = 0
 
-    # Conditions frontières
-    Display_Map[np.logical_and(Map >= 2, Map < 14)] = 3
+    Display_Map[np.logical_or(np.logical_and(Map >= 2, Map < 14),Map>=11)] = 3
     ## La source
     Display_Map[Map == 0] = 5
 
@@ -531,18 +516,17 @@ def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,co
 
 
 def Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False):
-        Source_Map = np.zeros([Nx, Ny], dtype=np.complex)
+        Source_Map = np.zeros([Ny, Nx], dtype=np.complex)
         h = dx
         r_max = Nx * h
         ## Pourrait probablement être intégré dans la construction de A...
-        for i in range(Nx):
-            for j in range(Ny):
+        for i in range(Ny):
+            for j in range(Nx):
                 r = np.sqrt((i - S_x) ** 2 + (j - S_y) ** 2) * h
                 if r < r_max:
                     if r == 0:
                         Source_Map[i, j] = 1
                     else:
-                        val = np.exp(1j * k2_eau * r) / np.sqrt(r)
                         # Vérifier si on devrait pas prendre la -1j*k2_eau*r
                         Source_Map[i, j] = np.exp(1j *2*np.real(k2_eau) * r) / np.sqrt(r)
 
@@ -580,47 +564,32 @@ def Source_Lineaire(Nx,Ny,S_x,S_y,theta,dx,k2_eau,n_eau,plot=False):
 
 
 def Source_Ponctuelle(Nx,Ny,S_x,S_y,theta,dx,plot=False):
-    """
-    Source ponctuelle implémenter avec une définition du Delta de Dirac utilisé dans Zangwill
-    Théoriquement dans la limite où m -> inf, mais ça cause un problème dans la définition de la 
-    source en TF/SF. m est choisi pour être assez grand relativement et permettre la simulation.
-    """
-    Source_Map = np.zeros([Nx, Ny], dtype=np.complex)
-    h = dx
-    m = 10
-    ## Pourrait probablement être intégré dans la construction de A...
-    for i in range(Nx):
-        for j in range(Ny):
-            Source_Map[i, j] = m/np.sqrt(np.pi)*np.exp(-m**2*(((i-S_x)*dx)**2+((j-S_y)*dx)**2))
-=======
         """
         Source ponctuelle implémenter avec une définition du Delta de Dirac utilisé dans Zangwill
         Théoriquement dans la limite où m -> inf, mais ça cause un problème dans la définition de la 
         source en TF/SF. m est choisi pour être assez grand relativement et permettre la simulation.
         """
-        Source_Map = np.zeros([Nx, Ny], dtype=np.complex)
-        h = dx
+        Source_Map = np.zeros([Ny, Nx], dtype=np.complex)
         m = 10
         ## Pourrait probablement être intégré dans la construction de A...
-        for i in range(Nx):
-            for j in range(Ny):
+        for i in range(Ny):
+            for j in range(Nx):
                 Source_Map[i, j] = m/np.sqrt(np.pi)*np.exp(-m**2*(((i-S_x)*dx)**2+((j-S_y)*dx)**2))
->>>>>>> c0f392383899f543ed167c7933eb9aeeb43654ea
 
-    if plot==True:
-        fig, ax = plt.subplots(1, 1, figsize=(11, 8))
-        cmap = plt.cm.get_cmap('jet', 22)
+        if plot==True:
+            fig, ax = plt.subplots(1, 1, figsize=(11, 8))
+            cmap = plt.cm.get_cmap('jet', 22)
 
-        ax.imshow(np.transpose(np.real(Source_Map)), cmap=cmap)
-        ax.set_title("La source ponctuelle", fontsize=15)
-        ax.set_xlabel("x", fontsize=11)
-        ax.set_ylabel("y", fontsize=11)
-        plt.show()
-    return Source_Map
+            ax.imshow(np.transpose(np.real(Source_Map)), cmap=cmap)
+            ax.set_title("La source ponctuelle", fontsize=15)
+            ax.set_xlabel("x", fontsize=11)
+            ax.set_ylabel("y", fontsize=11)
+            plt.show()
+        return Source_Map
 
 
-def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,p_source,SourceCylindrique,Source_Lineaire,Source_Ponctuelle,Map,\
-                   Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois,  alpha_Map, omega , B_eau,PML_mode=1,):
+def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,v_eau,p_source,SourceCylindrique,Source_Lineaire,Source_Ponctuelle,Map,\
+                   N_PML,Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois,  alpha_Map, omega , B_eau,PML_mode=1,):
     h=dx
     # **********************Construction de la matrice A************************
 
@@ -689,6 +658,13 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
     elif PML_mode==1:
         PML_Range=21
 
+    Source_mask = np.ones([Ny, Nx], dtype=np.complex) * np.finfo(float).eps
+    Source_mask[1:-1,1:-1] = 0
+    Source_mask[N_PML+2:Nx-N_PML-2,N_PML+2:Nx-N_PML-2] = 1
+#    Source_mask[N_PML-1,N_PML-1:Nx-N_PML] = 0
+#    Source_mask[N_PML-1:Nx-N_PML,N_PML-1] = 0
+#    Source_mask[Nx-N_PML,N_PML-1:Nx-N_PML] = 0
+#    Source_mask[N_PML-1:Nx-N_PML+1,Nx-N_PML] = 0
 
     for i in range(Nx):
         for j in range(Ny):
@@ -698,7 +674,7 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
 
             if np.logical_and(Type >= 14, Type <= PML_Range):
                 if PML_mode==1:
-                    Coefficient = Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau)
+                    Coefficient = Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau,N_PML)
                 if PML_mode==2:
                     alpha=alpha_Map[i,j]
                     Coefficient =Coeff_PML2(Type, h, Nx, Ny, omega,B_eau, alpha,rho_eau)
@@ -727,22 +703,23 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
 
                     A[L, int(pos)] = Coefficient[k]
 
+            
             if SourceCylindrique==True:
-                b[L] = Source_Map[i, j] * h ** 2 * rho_eau * p_source
+                b[L] = Source_Map[i, j] * Source_mask[i,j] * h ** 2 * rho_eau * p_source
             Q[L, L] = Q_map[i, j]
             
             if Source_Lineaire==True:
-                b[L] = Source_Map[i, j] * h ** 2 * rho_eau * p_source
+                b[L] = Source_Map[i, j] * Source_mask[i,j] * h ** 2 * rho_eau * p_source
             Q[L, L] = Q_map[i, j]
             
             if Source_Ponctuelle==True:
-                b[L] = Source_Map[i, j] * h ** 2 * rho_eau * p_source
+                b[L] = Source_Map[i, j] * Source_mask[i,j] * h ** 2 * rho_eau * p_source
             Q[L, L] = Q_map[i, j]
 
     A_sp = scipy.sparse.csc_matrix(A)
     Q_sp = scipy.sparse.csc_matrix(Q)
-    b_TFSF = b# (Q_sp.dot(A_sp) - A_sp.dot(Q_sp)).dot(b)
-
+    b_TFSF = (Q_sp.dot(A_sp) - A_sp.dot(Q_sp)).dot(b)
+#    b_TFSF = b
 
     return A_sp,b_TFSF
 
@@ -778,10 +755,10 @@ def Plots_Results(MapSol,MapSolSB,MapSol_TFSF,Display_Map,Interpolation="none"):
 
     ax[0][0].imshow(np.transpose(np.log10(np.real(MapSol)-1.2*np.min(np.real(MapSol)))), cmap="jet", alpha=1, interpolation=Interpolation)
     ax[0][0].set_title("Distribution  avec bois")
-    heatmap = ax[0][0].pcolor(np.transpose(np.log10(np.real(MapSol)-1.2*np.min(np.real(MapSol)))), cmap="jet")
+#    heatmap = ax[0][0].pcolor(np.transpose(np.log10(np.real(MapSol)-1.2*np.min(np.real(MapSol)))), cmap="jet")
 
     # legend
-    cbar = plt.colorbar(heatmap)
+#    cbar = plt.colorbar(heatmap)
 
     ax[0][1].imshow(np.transpose(np.log10(np.real(MapSolSB)-1.2*np.min(np.real(MapSolSB)))), alpha=1.0, cmap="jet", interpolation=Interpolation)
     ax[0][1].set_title("Distribution  sans bois")
