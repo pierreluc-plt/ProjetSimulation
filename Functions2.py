@@ -651,7 +651,7 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
     b_TFSF = np.zeros([Nx * Ny], dtype=complex)
 
     # Matrice sans bois
-    Q = np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
+    Q = np.zeros([Nx * Ny, Nx * Ny], dtype=np.int)
 
     if PML_mode==2:
         PML_Range=22
