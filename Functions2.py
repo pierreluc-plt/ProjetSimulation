@@ -518,17 +518,17 @@ def Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,co
 def Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False):
         Source_Map = np.zeros([Ny, Nx], dtype=np.complex)
         h = dx
-        r_max = Nx * h
+
         ## Pourrait probablement être intégré dans la construction de A...
         for i in range(Ny):
             for j in range(Nx):
                 r = np.sqrt((i - S_x) ** 2 + (j - S_y) ** 2) * h
-                if r < r_max:
-                    if r == 0:
-                        Source_Map[i, j] = 1
-                    else:
-                        # Vérifier si on devrait pas prendre la -1j*k2_eau*r
-                        Source_Map[i, j] = np.exp(1j *2*np.real(k2_eau) * r) / np.sqrt(r)
+
+                if r == 0:
+                    Source_Map[i, j] = 1
+                else:
+                    # Vérifier si on devrait pas prendre la -1j*k2_eau*r
+                    Source_Map[i, j] = np.exp(1j *2*np.real(k2_eau) * r) / np.sqrt(r)
 
         if plot==True:
             fig, ax = plt.subplots(1, 1, figsize=(11, 8))
