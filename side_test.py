@@ -19,7 +19,7 @@ from Functions2 import Source_Cylindrique,Source_Lineaire,Source_Ponctuelle,Cons
 
 # Nombre de points en x
 
-Nx = 101
+Nx = 301
 
 
 # Paramètres de la simulations
@@ -40,8 +40,8 @@ h=dx
 N_PML = 10
 
 # Emplacement du bois
-centre_bois_x = 65
-centre_bois_y = 60
+centre_bois_x = int(Nx / 2)  # 65
+centre_bois_y = int(Nx / 2)  # 60
 # Longueur en x,y du bois (en points)
 Nx_Bois = 20
 Ny_Bois = 20
@@ -77,7 +77,7 @@ B_eau = 2.15e9
 rho_bois = 640.72
 
 
-alpha_bois = 3.2e-4 * 0.01
+alpha_bois = 3.2e-4 #* 0.0001
 
 B_bois = 10e9
 
@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
 
     Map,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,\
-                                      plot=False,PML_mode=PML_mode, Bateau=True, Boisnez_bool=False)
+                                      plot=False,PML_mode=PML_mode, Bateau=True, Boisnez_bool=True)
     alpha_Map=Construction_alpha_Map(Nx,Ny,alpha_eau, alpha_PML,N_PML)
     #Temporaire
     Q_map=np.ones([Ny,Nx])
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     Surface = surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
 
 
-    omega_array=np.linspace(100,5001,1)
+    omega_array=np.linspace(100,5001,3)
 
     for omega in omega_array:
         # Paramètres calculés

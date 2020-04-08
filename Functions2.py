@@ -588,9 +588,13 @@ def Source_Ponctuelle(Nx,Ny,S_x,S_y,theta,dx,plot=False):
         return Source_Map
 
 
-def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,v_eau,p_source,SourceCylindrique,Source_Lineaire,Source_Ponctuelle,Map,\
-                   N_PML,Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois,  alpha_Map, omega , B_eau,PML_mode=1,TF_SF=True):
-    h=dx
+
+
+def Construction_A(Nx, Ny, dx, Neuf_points, k2_eau, k2_bois, gamma_eau, gamma_bois, rho_eau, v_eau, p_source,
+                   SourceCylindrique, Source_Lineaire, Source_Ponctuelle, Map, \
+                   N_PML, Source_Map, Q_map, coeff, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, alpha_Map, omega,
+                   B_eau, PML_mode=1, TF_SF=True):
+    h = dx
     # **********************Construction de la matrice A************************
 
     # L'ordre des coefficients est toujours
@@ -615,7 +619,6 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
 
     # Cas 3 à 10:
 
-
     Coeff3 = Coeff_Frontiere(gamma_eau, gamma_bois, -1 / np.sqrt(2), -1 / np.sqrt(2))
     Coeff4 = Coeff_Frontiere(gamma_eau, gamma_bois, 0, -1)
     Coeff5 = Coeff_Frontiere(gamma_bois, gamma_eau, 1 / np.sqrt(2), -1 / np.sqrt(2))  # -ny
@@ -627,44 +630,52 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
 
     # Cas 11 à 12 (triangle)
     # Cas 11
-    Nx11 = -np.cos(coeff/2) #-
-    Ny11 = -np.sin(coeff/2) # -
-    Coeff11= Coeff_Frontiere(gamma_eau, gamma_bois, Nx11, Ny11)
+    Nx11 = -np.cos(coeff / 2)  # -
+    Ny11 = -np.sin(coeff / 2)  # -
+    Coeff11 = Coeff_Frontiere(gamma_eau, gamma_bois, Nx11, Ny11)
     # Cas 12
-    Nx12 = np.cos(coeff/2)
-    Ny12 = -np.sin(coeff/2)
-    Coeff12= Coeff_Frontiere(gamma_eau, gamma_bois, Nx12, Ny12)
-    
-    # Cas 13 (Cercle)    
+    Nx12 = np.cos(coeff / 2)
+    Ny12 = -np.sin(coeff / 2)
+    Coeff12 = Coeff_Frontiere(gamma_eau, gamma_bois, Nx12, Ny12)
+
+    # Cas 13 (Cercle)
     # Voir la boucle plus bas
 
     # Cas 14 à 21 (PML):Dans les fonctions suivantes
 
     # Cas 22 (source): Option 2
-    #Coeff22 = [0, 1, 0, 1, -(4 - k2_eau * h ** 2), 1, 0, 1, 0]
+    # Coeff22 = [0, 1, 0, 1, -(4 - k2_eau * h ** 2), 1, 0, 1, 0]
 
     Dict_Coeff = {1: Coeff1, 2: Coeff2, 3: Coeff3, 4: Coeff4, 5: Coeff5, 6: Coeff6, 7: Coeff7, 8: Coeff8, 9: Coeff9,
-                  10: Coeff10,11:Coeff11,12:Coeff12}
+                  10: Coeff10, 11: Coeff11, 12: Coeff12}
 
-    A = np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
+    # A = np.zeros([Nx * Ny, Nx * Ny], dtype=complex)
     b = np.zeros([Nx * Ny], dtype=complex)
     b_TFSF = np.zeros([Nx * Ny], dtype=complex)
 
-    # Matrice sans bois
-    Q = np.zeros([Nx * Ny, Nx * Ny], dtype=np.int)
+    data_A = []
+    ligne_A = []
+    colonne_A = []
 
-    if PML_mode==2:
-        PML_Range=22
-    elif PML_mode==1:
-        PML_Range=21
+    # Matrice sans bois
+    data_Q = []
+    ligne_Q = []
+    colonne_Q = []
+
+    # Q = np.zeros([Nx * Ny, Nx * Ny], dtype=int)
+
+    if PML_mode == 2:
+        PML_Range = 22
+    elif PML_mode == 1:
+        PML_Range = 21
 
     Source_mask = np.ones([Ny, Nx], dtype=np.complex) * np.finfo(float).eps
-    Source_mask[1:-1,1:-1] = 0
-    Source_mask[N_PML+2:Nx-N_PML-2,N_PML+2:Nx-N_PML-2] = 1
-#    Source_mask[N_PML-1,N_PML-1:Nx-N_PML] = 0
-#    Source_mask[N_PML-1:Nx-N_PML,N_PML-1] = 0
-#    Source_mask[Nx-N_PML,N_PML-1:Nx-N_PML] = 0
-#    Source_mask[N_PML-1:Nx-N_PML+1,Nx-N_PML] = 0
+    Source_mask[1:-1, 1:-1] = 0
+    Source_mask[N_PML + 2:Nx - N_PML - 2, N_PML + 2:Nx - N_PML - 2] = 1
+    #    Source_mask[N_PML-1,N_PML-1:Nx-N_PML] = 0
+    #    Source_mask[N_PML-1:Nx-N_PML,N_PML-1] = 0
+    #    Source_mask[Nx-N_PML,N_PML-1:Nx-N_PML] = 0
+    #    Source_mask[N_PML-1:Nx-N_PML+1,Nx-N_PML] = 0
 
     for i in range(Nx):
         for j in range(Ny):
@@ -673,20 +684,20 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
             Type = int(Map[i, j])
 
             if np.logical_and(Type >= 14, Type <= PML_Range):
-                if PML_mode==1:
-                    Coefficient = Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau,N_PML)
-                if PML_mode==2:
-                    alpha=alpha_Map[i,j]
-                    Coefficient =Coeff_PML2(Type, h, Nx, Ny, omega,B_eau, alpha,rho_eau)
+                if PML_mode == 1:
+                    Coefficient = Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau, v_eau, N_PML)
+                if PML_mode == 2:
+                    alpha = alpha_Map[i, j]
+                    Coefficient = Coeff_PML2(Type, h, Nx, Ny, omega, B_eau, alpha, rho_eau)
 
             elif Type == 13:
-                Nx13 = (i-centre_bois_x)/coeff
+                Nx13 = (i - centre_bois_x) / coeff
                 # Coordonnées en y du centre du cercle
-                centre_y = centre_bois_y - Ny_Bois/2 + np.sqrt(coeff**2-(Nx_Bois/2)**2)
-                Ny13 = (j-centre_y)/coeff
+                centre_y = centre_bois_y - Ny_Bois / 2 + np.sqrt(coeff ** 2 - (Nx_Bois / 2) ** 2)
+                Ny13 = (j - centre_y) / coeff
                 Coefficient = Coeff_Frontiere(gamma_eau, gamma_bois, Nx13, Ny13)
             else:
-                if Type!=0:
+                if Type != 0:
                     Coefficient = Dict_Coeff[Type]
 
             if np.logical_and(np.logical_or(Type == 1, Type == 2), Neuf_points == True):
@@ -697,33 +708,30 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
                 Position = [p(i - 2, j, Nx), p(i - 1, j, Nx), p(i, j - 2, Nx), p(i, j - 1, Nx), p(i, j, Nx),
                             p(i + 1, j, Nx), p(i + 2, j, Nx),
                             p(i, j + 1, Nx), p(i, j + 2, Nx)]
+            if TF_SF == True:
+                data_Q.append(Q_map[i, j])
+                ligne_Q.append(L)
+                colonne_Q.append(L)
 
             for k, pos in enumerate(Position):
-                if np.logical_and(pos >= 0, pos < (Nx * Ny)):
+                # if np.logical_and(pos >= 0, pos < (Nx * Ny)):
+                if Coefficient[k] != 0:
+                    data_A.append(Coefficient[k])
+                    ligne_A.append(L)
+                    colonne_A.append(pos)
+                    # A[L, int(pos)] = Coefficient[k]
+            b[L] = Source_Map[i, j] * Source_mask[i, j] * h ** 2 * rho_eau * p_source
 
-                    A[L, int(pos)] = Coefficient[k]
-
-            
-            if SourceCylindrique==True:
-                b[L] = Source_Map[i, j] * Source_mask[i,j] * h ** 2 * rho_eau * p_source
-            Q[L, L] = Q_map[i, j]
-            
-            if Source_Lineaire==True:
-                b[L] = Source_Map[i, j] * Source_mask[i,j] * h ** 2 * rho_eau * p_source
-            Q[L, L] = Q_map[i, j]
-            
-            if Source_Ponctuelle==True:
-                b[L] = Source_Map[i, j] * Source_mask[i,j] * h ** 2 * rho_eau * p_source
-            Q[L, L] = Q_map[i, j]
-
-    A_sp =scipy.sparse.csc_matrix(A) #scipy.sparse.csc_matrix(A)
-    if TF_SF==True:
-        Q_sp =scipy.sparse.csc_matrix(Q) #scipy.sparse.csc_matrix(Q)
+    A_sp = scipy.sparse.coo_matrix((data_A, (ligne_A, colonne_A)), shape=(Nx ** 2, Nx ** 2), dtype=np.complex)
+    A_sp = A_sp.tocsc()  # scipy.sparse.csc_matrix(A)
+    if TF_SF == True:
+        Q_sp = scipy.sparse.coo_matrix((data_Q, (ligne_Q, colonne_Q)), shape=(Nx ** 2, Nx ** 2), dtype=np.complex)
+        Q_sp = Q_sp.tocsc()  # scipy.sparse.csc_matrix(A)
         b_TFSF = (Q_sp.dot(A_sp) - A_sp.dot(Q_sp)).dot(b)
     else:
-        b_TFSF=b
+        b_TFSF = b
 
-    return A_sp,b_TFSF
+    return A_sp, b_TFSF
 
 def Resolution(A_sp, b_TFSF,Nx,Ny,D_x,D_y):
 
