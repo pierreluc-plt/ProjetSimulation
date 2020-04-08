@@ -667,6 +667,7 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
     Coeff12= Coeff_Frontiere(gamma_eau, gamma_bois, Nx12, Ny12)
     
     # Cas 13 (Cercle)    
+    centre_y = centre_bois_y - Ny_Bois/2 + np.sqrt(coeff**2-(Nx_Bois/2)**2)
     # Voir la boucle plus bas
 
     # Cas 14 à 21 (PML):Dans les fonctions suivantes
@@ -706,7 +707,6 @@ def Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_
             elif Type == 13:
                 Nx13 = (i-centre_bois_x)/coeff
                 # Coordonnées en y du centre du cercle
-                centre_y = centre_bois_y - Ny_Bois/2 + np.sqrt(coeff**2-(Nx_Bois/2)**2)
                 Ny13 = (j-centre_y)/coeff
                 Coefficient = Coeff_Frontiere(gamma_eau, gamma_bois, Nx13, Ny13)
             else:
