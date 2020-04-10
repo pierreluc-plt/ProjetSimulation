@@ -19,7 +19,7 @@ from Functions2 import Source_Cylindrique,Source_Lineaire,Source_Ponctuelle,Cons
 
 # Nombre de points en x
 
-Nx = 301
+Nx = 1501
 
 
 # Paramètres de la simulations
@@ -39,16 +39,16 @@ h=dx
 # Épaisseur (en points de la couche de PML)
 N_PML = 10
 
-# Emplacement du bois
+
 centre_bois_x = int(Nx / 2)  # 65
-centre_bois_y = int(Nx / 2)  # 60
+centre_bois_y = int(1.3 * Nx / 2)  # 600#60
 # Longueur en x,y du bois (en points)
-Nx_Bois = 20
-Ny_Bois = 20
+Nx_Bois = int(5 / dx)
+Ny_Bois = int(10 / dx)
 
 # Emplacement de la source
-S_x = 20
-S_y = 20
+S_x = int(Nx / 2)
+S_y = 75
 
 # Emplacement du détecteur
 D_x = 99
@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
 
     Map,Display_Map= Construction_Map(Nx,Ny,Nx_Bois,Ny_Bois,centre_bois_x, centre_bois_y,forme,coeff,S_x,S_y,dx,N_PML,\
-                                      plot=False,PML_mode=PML_mode, Bateau=True, Boisnez_bool=True)
+                                      plot=False,PML_mode=PML_mode, Bateau=True, Boisnez_bool=False)
     alpha_Map=Construction_alpha_Map(Nx,Ny,alpha_eau, alpha_PML,N_PML)
     #Temporaire
     Q_map=np.ones([Ny,Nx])
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     Surface = surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
 
 
-    omega_array=np.linspace(100,5001,3)
+    omega_array=2*np.pi*np.array([2500])
 
     for omega in omega_array:
         # Paramètres calculés
@@ -211,6 +211,8 @@ if __name__ == "__main__":
     plt.ylabel("SER")
     plt.legend()
     plt.show()
+    #np.save("Resultats/Carre1501_Source_f250Hz.npy", Source_Map)
+    np.save("Resultats/Carre1501_f5000Hz_SER" + str(SERv2) + ".npy", MapSol_TFSF)
 
 ### Test Gif
 
