@@ -528,7 +528,7 @@ def Source_Cylindrique(Nx,Ny,S_x,S_y,dx,k2_eau,plot=False):
                     Source_Map[i, j] = 1
                 else:
                     # Vérifier si on devrait pas prendre la -1j*k2_eau*r
-                    Source_Map[i, j] = np.exp(1j *2*np.real(k2_eau) * r) / np.sqrt(r)
+                    Source_Map[i, j] = np.exp(1j *np.sqrt(np.real(k2_eau)) * r) / np.sqrt(r)
 
         if plot==True:
             fig, ax = plt.subplots(1, 1, figsize=(11, 8))
@@ -822,18 +822,46 @@ def Surface_equivalente(S_x,S_y,p_source,Nx,Lx,Nx_Bois,Ny_Bois,forme,coeff,Sourc
     
     return SER
 
-def SER2(Sx,Sy,SF_only,Source_Map,p_source,centre_bois_x,centre_bois_y, R_integration,dx):
+
+def SER2(Sx, Sy, SF_only, Source_Map, p_source, centre_bois_x, centre_bois_y, R_integration, dx, forme, coeff, Nx_Bois,
+         Ny_Bois):
     # R_integration est en mètre
-    P_incidente=0
-    P_recu=0
+    x_bois = centre_bois_x
+    y_bois = centre_bois_y
+    x_bateau = centre_bois_x
+    y_bateau = centre_bois_y
+
+    if forme == 'triangle':
+        x_triangle = centre_bois_x
+        hauteur = Nx_Bois / (2 * np.tan(coeff / 2))
+        sommet_triangle = centre_bois_y - Ny_Bois / 2 - hauteur
+        y_triangle = (2 * (centre_bois_y - Ny_Bois / 2) + centre_bois_y - Ny_Bois / 2 - hauteur) / 3
+        x_bateau = centre_bois_x
+        y_bateau = (centre_bois_y * Ny_Bois * Nx_Bois + y_triangle * Nx_Bois * hauteur / 2) / (
+                    Ny_Bois * Nx_Bois + Nx_Bois * hauteur / 2)
+    elif forme == 'cercle':
+        # Theta est l'anlge de l'arc du cercle
+        theta = 2 * np.arcsin(Nx_Bois / (2 * coeff))
+        x_cercle = centre_bois_x
+        hauteur = coeff * (1 - np.cos(coeff / 2))
+        # c est la distance entre le centre du cercle et le devant du bateau
+        c = coeff - hauteur
+        y_cercle = centre_bois_y - Ny_Bois / 2 - (
+                    (4 * coeff * (np.sin(coeff / 2)) ** 3) / (3 * (coeff - np.sin(coeff))) - c)
+        x_bateau = centre_bois_x
+        Aire_cercle = ((coeff ** 2) / 2) * (coeff - np.sin(coeff))
+        y_bateau = (centre_bois_y * Ny_Bois * Nx_Bois + y_cercle * Aire_cercle) / (Ny_Bois * Nx_Bois + Aire_cercle)
+
+    P_incidente = 0
+    P_recu = 0
     for i in range(Source_Map.shape[0]):
         for j in range(Source_Map.shape[1]):
-            if np.sqrt((i-Sx)**2+(j-Sy)**2)<R_integration:
-                P_incidente=abs(np.real(p_source*Source_Map[i,j]))+P_incidente
-                P_recu=abs(np.real(SF_only[i,j]))+P_recu
+            if np.sqrt((i - Sx) ** 2 + (j - Sy) ** 2) < R_integration:
+                P_incidente = abs(np.real(p_source * Source_Map[i, j])) + P_incidente
+                P_recu = abs(np.real(SF_only[i, j])) + P_recu
 
-    Distance_bateau_bois=np.sqrt((Sx-centre_bois_x)**2+(Sy-centre_bois_y)**2)*dx
-    SER=P_recu/P_incidente*Distance_bateau_bois**2
+    Distance_bateau_bois = np.sqrt((Sx - x_bateau) ** 2 + (Sy - y_bateau) ** 2) * dx
+    SER = P_recu / P_incidente * Distance_bateau_bois ** 2
     return SER
 
 def Select_Source(SourceLineaire, SourceCylindrique, SourcePonctuelle, Nx, Ny, S_x, S_y, dx, k2_eau, k0_eau, n_eau,\

@@ -19,7 +19,7 @@ from Functions2 import Source_Cylindrique,Source_Lineaire,Source_Ponctuelle,Cons
 
 # Nombre de points en x
 
-Nx = 1501
+Nx = 501
 
 
 # Paramètres de la simulations
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     Surface = surface_directe(S_x, S_y, centre_bois_x, centre_bois_y, Nx_Bois, Ny_Bois, forme, coeff)
 
 
-    omega_array=2*np.pi*np.array([2500])
+    omega_array=2*np.pi*np.array([1500,2500])
 
     for omega in omega_array:
         # Paramètres calculés
@@ -193,7 +193,8 @@ if __name__ == "__main__":
         plt.figure()
         plt.imshow(np.transpose((np.real(SF_only[N_PML:-N_PML,N_PML:-N_PML]))), alpha=1.0, cmap="jet",interpolation="gaussian")
         plt.show()
-        SERv2=SER2(S_x, S_y, MapSol_TFSF, Source_Map,p_source, centre_bois_x, centre_bois_y, 5, dx)
+        SERv2 = SER2(S_x, S_y, MapSol_TFSF, Source_Map, p_source, centre_bois_x, centre_bois_y, int(1 / dx), dx, forme,
+                     coeff, Nx_Bois, Ny_Bois)
         SER_Array_v2.append(SERv2)
 
         SER = Surface_equivalente(S_x, S_y, p_source, Nx, Lx, Nx_Bois, Ny_Bois, forme, coeff, Source_Map, SF_only,
