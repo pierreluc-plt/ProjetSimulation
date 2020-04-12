@@ -68,7 +68,7 @@ p_source = -1e12
 # Eau
 rho_eau = 998.3
 
-alpha_eau = 1.18 *1e-7
+alpha_eau = 0 # 1.18 *1e-7
 
 
 B_eau = 2.15e9

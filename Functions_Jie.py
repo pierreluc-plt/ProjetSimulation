@@ -293,7 +293,7 @@ def Coeff_Frontiere(gamma1, gamma2, nx, ny):
 # Coefficients pour les PML
 def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau,N_PML):
     k = np.sqrt(k2_eau) # p-e seulement la partie réelle de k2eau?
-    beta = 1
+    beta = 0
 
     x = i * h 
     y = j * h   # Pour éviter les divisions par 0 ?
@@ -672,6 +672,7 @@ def Construction_A(Nx, Ny, dx, Neuf_points, k2_eau, k2_bois, gamma_eau, gamma_bo
     Source_mask = np.ones([Ny, Nx], dtype=np.complex) * np.finfo(float).eps
     Source_mask[1:-1, 1:-1] = 0
     Source_mask[N_PML + 2:Nx - N_PML - 2, N_PML + 2:Nx - N_PML - 2] = 1
+    
     #    Source_mask[N_PML-1,N_PML-1:Nx-N_PML] = 0
     #    Source_mask[N_PML-1:Nx-N_PML,N_PML-1] = 0
     #    Source_mask[Nx-N_PML,N_PML-1:Nx-N_PML] = 0
