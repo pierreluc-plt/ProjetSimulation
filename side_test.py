@@ -19,7 +19,7 @@ from Functions2 import Source_Cylindrique,Source_Lineaire,Source_Ponctuelle,Cons
 
 # Nombre de points en x
 
-Nx = 501
+Nx = 1001
 
 
 # Paramètres de la simulations
