@@ -293,7 +293,7 @@ def Coeff_Frontiere(gamma1, gamma2, nx, ny):
 # Coefficients pour les PML
 def Coeff_PML(Type, i, j, h, Nx, Ny, k2_eau,v_eau,N_PML):
     k = np.sqrt(k2_eau) # p-e seulement la partie réelle de k2eau?
-    beta = 0
+    beta = 1
 
     x = i * h 
     y = j * h   # Pour éviter les divisions par 0 ?
@@ -623,7 +623,7 @@ def Construction_A(Nx, Ny, dx, Neuf_points, k2_eau, k2_bois, gamma_eau, gamma_bo
     Coeff4 = Coeff_Frontiere(gamma_eau, gamma_bois, 0, -1)
     Coeff5 = Coeff_Frontiere(gamma_bois, gamma_eau, 1 / np.sqrt(2), -1 / np.sqrt(2))  # -ny
     Coeff6 = Coeff_Frontiere(gamma_bois, gamma_eau, 1, 0)
-    Coeff7 = Coeff_Frontiere(gamma_bois, gamma_eau, 1 / np.sqrt(2), 1 / np.sqrt(2))
+    Coeff7 = Coeff_Frontiere(gamma_bois, gamma_eau, 0 / np.sqrt(2), 0 / np.sqrt(2))
     Coeff8 = Coeff_Frontiere(gamma_bois, gamma_eau, 0, 1)
     Coeff9 = Coeff_Frontiere(gamma_eau, gamma_bois, -1 / np.sqrt(2), 1 / np.sqrt(2))
     Coeff10 = Coeff_Frontiere(gamma_eau, gamma_bois, -1, 0)
