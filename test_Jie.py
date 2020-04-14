@@ -47,7 +47,7 @@ Nx_Bois = int(5 / dx)
 Ny_Bois = int(10 / dx)
 
 # Emplacement de la source
-S_x = int(Nx / 5*2)
+S_x = int(Nx / 5*4)
 S_y = 50
 
 # Emplacement du détecteur
@@ -59,16 +59,16 @@ D_y = 99
 # Fréquence d'oscillation de la source
     # Mandat demande entre 100 Hz et 10 kHz
 
-omega = 1000
+omega = 750
 
 
 # Intensité de la source (arbitraire)
-p_source = -1e12
+p_source = 1
 
 # Eau
 rho_eau = 998.3
 
-alpha_eau = 0 # 1.18 *1e-7
+alpha_eau = 1.18 *1e-7
 
 
 B_eau = 2.15e9
@@ -164,7 +164,7 @@ if __name__ == "__main__":
                       theta, Plot_Source)
 
         A_sp,b_TFSF= Construction_A(Nx,Ny,dx,Neuf_points,k2_eau,k2_bois,gamma_eau,gamma_bois,rho_eau,v_eau,p_source,SourceCylindrique,SourceLineaire,SourcePonctuelle,
-                              Map,N_PML,Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois, alpha_Map,omega,B_eau, PML_mode=PML_mode,TF_SF=True)
+                              Map,N_PML,Source_Map,Q_map,coeff,centre_bois_x,centre_bois_y,Nx_Bois,Ny_Bois, alpha_Map,omega,B_eau, PML_mode=PML_mode,TF_SF=False)
 
 
         MapSol_TFSF=Resolution(A_sp, b_TFSF,Nx,Ny,D_x,D_y)
