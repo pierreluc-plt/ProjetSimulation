@@ -623,7 +623,7 @@ def Construction_A(Nx, Ny, dx, Neuf_points, k2_eau, k2_bois, gamma_eau, gamma_bo
     Coeff4 = Coeff_Frontiere(gamma_eau, gamma_bois, 0, -1)
     Coeff5 = Coeff_Frontiere(gamma_bois, gamma_eau, 1 / np.sqrt(2), -1 / np.sqrt(2))  # -ny
     Coeff6 = Coeff_Frontiere(gamma_bois, gamma_eau, 1, 0)
-    Coeff7 = Coeff_Frontiere(gamma_bois, gamma_eau, 0 / np.sqrt(2), 0 / np.sqrt(2))
+    Coeff7 = Coeff_Frontiere(gamma_bois, gamma_eau, 1 / np.sqrt(2), 1 / np.sqrt(2))
     Coeff8 = Coeff_Frontiere(gamma_bois, gamma_eau, 0, 1)
     Coeff9 = Coeff_Frontiere(gamma_eau, gamma_bois, -1 / np.sqrt(2), 1 / np.sqrt(2))
     Coeff10 = Coeff_Frontiere(gamma_eau, gamma_bois, -1, 0)
